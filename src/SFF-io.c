@@ -8,8 +8,8 @@
 extern "C" {
 #endif
 
-// Base Roche454Reads includes
-#include "Roche454Reads.h"
+// Base rSFFreader includes
+#include "rSFFreader.h"
 
 // System Includes
 #include <stdio.h>
@@ -426,6 +426,8 @@ typedef struct sff_loader_ext {
 	CharAEAE ans_names_buf;
 	cachedXVectorList cached_seq;
 	cachedXVectorList cached_qual;
+	cachedIRanges cached_qual_clip;
+	cachedIRanges cached_adapt_clip;
 	const int *lkup_seq;
 	int lkup_length_seq;
 	const int *lkup_qual;
@@ -480,7 +482,8 @@ static void SFF_load_qual(SFFloader *loader, const cachedCharSeq *dataline)
 	return;
 }
 
-static SFF_loaderExt new_SFF_loaderExt(SEXP seq,SEXP qual, SEXP lkup_seq, SEXP lkup_qual)
+
+static SFF_loaderExt new_SFF_loaderExt(SEXP seq,SEXP qual, SEXP qual_clip, SEXP adapt_clip, SEXP lkup_seq, SEXP lkup_qual)
 {
 	SFF_loaderExt loader_ext;
 
@@ -488,6 +491,9 @@ static SFF_loaderExt new_SFF_loaderExt(SEXP seq,SEXP qual, SEXP lkup_seq, SEXP l
 		new_CharAEAE(get_XVectorList_length(seq), 0);
 	loader_ext.cached_seq = cache_XVectorList(seq);
 	loader_ext.cached_qual = cache_XVectorList(qual);
+	loader_ext.cached_qual_clip = cache_IRanges(qual_clip);
+	loader_ext.cached_adapt_clip = cache_IRanges(adapt_clip);
+
 	if (lkup_seq == R_NilValue) {
 		loader_ext.lkup_seq = NULL;
 	} else {
@@ -529,7 +535,10 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
 	COMMONheader commonHeader;
     READheader header;
 
-	cachedCharSeq dataline;
+    SEXP qstart, qwidth, astart, awidth;
+
+
+    cachedCharSeq dataline;
 
 	// C declarations
 	int i, padding_size, fres, load_record;
@@ -550,6 +559,11 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
 
     READdata data;
 
+    PROTECT(qstart = NEW_INTEGER(commonHeader.number_of_reads));
+    PROTECT(qwidth = NEW_INTEGER(commonHeader.number_of_reads));
+    PROTECT(astart = NEW_INTEGER(commonHeader.number_of_reads));
+    PROTECT(awidth = NEW_INTEGER(commonHeader.number_of_reads));
+
 	// for every read,
 	for(int read=0; read<commonHeader.number_of_reads; read++) {
 		// Read Header Section
@@ -569,6 +583,12 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
 		header.clip_adapter_right = htons(header.clip_adapter_right);
 		data.name = malloc(sizeof(char)*(header.name_length+1));
 		if(data.name==NULL) Rf_error("id: cannot allocate memory");
+
+		// save clip points
+		INTEGER(qstart)[read] = (int)head.clip_qual_left;
+		INTEGER(qwidth)[read] = (int)head.clip_qual_right-(int)head.clip_qual_left;
+		INTEGER(astart)[read] = (int)head.clip_adapter_left;
+		INTEGER(awidth)[read] = (int)head.clip_adapter_right-(int)head.clip_adapter_left;
 
 		fres = fread( data.name, sizeof(char),header.name_length, file);
 		data.name[header.name_length] = '\0';
@@ -732,12 +752,15 @@ sff_geometry(SEXP files)
     UNPROTECT(3);
     return(ans);
 }
+
+
 SEXP
 read_roche_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose)
 {
     int i, nfiles, recno,load_seqids,set_verbose, ans_length;
-    SEXP fname, ans = R_NilValue, reads = R_NilValue, quals = R_NilValue, TMP;
-    SEXP ans_geom, ans_names, header;
+    SEXP fname, ans_geom, ans_names, header;
+    SEXP  ans = R_NilValue, reads = R_NilValue, quals = R_NilValue,
+    		qual_clip = R_NilValue, adapt_clip = R_NilValue;
 
     SFF_loaderExt loader_ext;
 	SFFloader loader;
@@ -757,8 +780,10 @@ read_roche_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP v
     PROTECT(header = read_roche_sff_header(files,verbose));
     PROTECT(reads = alloc_XRawList("DNAStringSet","DNAString",VECTOR_ELT(ans_geom,1)));
     PROTECT(quals = alloc_XRawList("BStringSet","BString",VECTOR_ELT(ans_geom,1)));
+    PROTECT(qual_clip = alloc_IRanges("IRanges",ans_length));
+    PROTECT(adapt_clip = alloc_IRanges("IRanges",ans_length));
 
-	loader_ext = new_SFF_loaderExt(reads, quals, lkup_seq,lkup_qual); //Biostrings/XStringSet_io.c
+	loader_ext = new_SFF_loaderExt(reads, quals, qual_clip, adapt_clip, lkup_seq,lkup_qual); //Biostrings/XStringSet_io.c
 	loader = new_SFF_loader(load_seqids, &loader_ext); //Biostrings/XStringSet_io.c
 
 	recno = 0;
@@ -781,11 +806,13 @@ read_roche_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP v
 		UNPROTECT(1);
 	}
 
-    PROTECT(ans = NEW_LIST(3));
+    PROTECT(ans = NEW_LIST(5));
     SET_VECTOR_ELT(ans, 0, header);
 	SET_VECTOR_ELT(ans, 1, reads); /* read */
 	SET_VECTOR_ELT(ans, 2, quals); /* quality */
-    UNPROTECT(5);
+	SET_VECTOR_ELT(ans, 3, qual_clip); /* quality based clip points */
+	SET_VECTOR_ELT(ans, 4, adapt_clip); /* adapter based clip points */
+    UNPROTECT(7);
 //    ans = files;
 	return ans;
 }
