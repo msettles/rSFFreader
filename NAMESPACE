@@ -1,0 +1,10 @@
+useDynLib(Roche454Reads)
+
+import(methods)
+import(Biostrings)
+import(IRanges)
+
+exportClassPattern("^[^\\.]")
+
+exportPattern("^[^\\.]")
+

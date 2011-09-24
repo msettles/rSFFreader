@@ -1,0 +1,14 @@
+Package: Roche454Reads
+Type: Package
+Title: What the package does (short line)
+Version: 0.99.0
+Date: 2010-05-21
+Author: Matt Settles <msettles@uidaho.edu>
+Maintainer: Matt Settles <msettles@uidaho.edu>
+Description: More about what it does (maybe more than one line)
+License: Artistic-2.0
+Depends: R (>= 2.11.0), Biostrings (>= 2.13.52), IRanges, methods
+Imports: methods, Biostrings, IRanges
+LinkingTo: Biostrings, IRanges
+biocViews: DataImport, Sequencing, HighThroughputSequencing,
+           QualityControl
