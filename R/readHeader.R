@@ -25,7 +25,7 @@ readsff <- function(filenames, use.names=TRUE, verbose=TRUE){
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
 	
-	return(.Call("read_roche_sff",filenames,use.names,lkup_seq, NULL,verbose,"Roche454Reads"))
+	return(.Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"Roche454Reads"))
 }
 
 readSFFheader <- function(filenames,verbose=TRUE) {
@@ -33,5 +33,5 @@ readSFFheader <- function(filenames,verbose=TRUE) {
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
 	
-	return(.Call("read_roche_sff_header", filenames,verbose,"Roche454Reads"))
+	return(.Call("read_sff_header", filenames,verbose,"Roche454Reads"))
 }

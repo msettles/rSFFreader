@@ -1,5 +1,5 @@
-#ifndef _ROCHE454READS_H_
-#define _ROCHE454READS_H_
+#ifndef _RSFFREADER_H_
+#define _RSFFREADER_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -16,7 +16,7 @@ extern "C" {
 #include <stdint.h>		// uint64_t, uint32_t, uint16_t
 
 
-SEXP read_roche_sff(
+SEXP read_sff(
 		SEXP files,
 		SEXP use_names,
 		SEXP lkup_seq,
@@ -24,7 +24,7 @@ SEXP read_roche_sff(
 		SEXP verbose
 );
 
-SEXP read_roche_sff_header(
+SEXP read_sff_header(
 		SEXP files,
 		SEXP verbose
 );
@@ -38,5 +38,5 @@ sff_geometry(
 }
 #endif
 
-#endif /* _ROCHE454READS_H_ */
+#endif /* _RSFFHEADER_H_ */
 
