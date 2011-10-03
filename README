@@ -1,0 +1,8 @@
+rSFFreader is a R package to read in sequence data (sequence, quality and clip points)
+from both Roche 454 sequencers and Life Sciences Ion Torrent Seuqencers.
+
+Future development will include
+
+Writing out SFF files
+Reading in flowgrams
+integration of flograms with sequence data

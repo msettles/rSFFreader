@@ -629,8 +629,8 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
 
         // save clip points
         if (load_record && loader->load_seq != NULL) {
-            loader->load_qclip(loader, (int)header.clip_qual_left,(int)header.clip_qual_right-(int)header.clip_qual_left);
-            loader->load_aclip(loader, (int)header.clip_adapter_left,(int)header.clip_adapter_right-(int)header.clip_adapter_left);
+            loader->load_qclip(loader, (int)header.clip_qual_left,(int)header.clip_qual_right-(int)header.clip_qual_left+1);
+            loader->load_aclip(loader, (int)header.clip_adapter_left,(int)header.clip_adapter_right-(int)header.clip_adapter_left+1);
         }
 
 
@@ -845,7 +845,7 @@ read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose
         PROTECT(ans_names =
             new_CHARACTER_from_CharAEAE(&(loader_ext.ans_names_buf))); //IRanges
         set_XVectorList_names(reads, ans_names); //IRanges
-        set_XVectorList_names(quals, ans_names); //IRanges
+//        set_XVectorList_names(quals, ans_names); //IRanges
         UNPROTECT(1);
     }
 
