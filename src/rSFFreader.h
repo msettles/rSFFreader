@@ -29,9 +29,16 @@ SEXP read_sff_header(
 		SEXP verbose
 );
 
-SEXP
-sff_geometry(
+SEXP sff_geometry(
 		SEXP files
+);
+
+SEXP write_phred_quality(
+		SEXP id,
+		SEXP quality, 
+		SEXP fname,
+		SEXP fmode,
+		SEXP max_width
 );
 
 #ifdef __cplusplus

@@ -227,6 +227,12 @@ phredToChar(uint8_t score)
     return (char)((int)score + 33);
 }
 
+int
+CharToPhred(char score)
+{
+    return ((int)score - 33);
+}
+
 /**************************** END Auxilary Functions **************************/
 
 /**************************** SFF Header Functions ****************************/
@@ -803,7 +809,7 @@ SEXP
 read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose)
 {
     int i, nfiles, recno,load_seqids,set_verbose, ans_length;
-    SEXP fname, ans_geom, ans_names, header;
+    SEXP fname, ans_geom, ans_names, header, nms;
     SEXP  ans = R_NilValue, reads = R_NilValue, quals = R_NilValue,
             qual_clip = R_NilValue, adapt_clip = R_NilValue;
 	SEXP qclip_start, qclip_width, aclip_start, aclip_width;
@@ -868,11 +874,98 @@ read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose
     SET_VECTOR_ELT(ans, 3, qual_clip); /* quality based clip points */
     SET_VECTOR_ELT(ans, 4, adapt_clip); /* adapter based clip points */
     UNPROTECT(11);
-//    ans = files;
+
+    PROTECT(nms = NEW_CHARACTER(5));
+    SET_STRING_ELT(nms, 0, mkChar("header"));
+	SET_STRING_ELT(nms, 1, mkChar("sread"));
+    SET_STRING_ELT(nms, 2, mkChar("quality"));
+    SET_STRING_ELT(nms, 3, mkChar("qualityClip"));
+    SET_STRING_ELT(nms, 4, mkChar("adapterClip"));
+    setAttrib(ans, R_NamesSymbol, nms);
+	UNPROTECT(1);
+
     return ans;
 }
 
-/******************************* END Main Function ********************************/
+/******************************* END Main Functions ********************************/
+
+/******** Borrowing write_fastq from ShortRead *************/
+
+/******************************* Write out phred qualities *************************/
+
+char *
+_cache_to_char(cachedXStringSet *cache, const int i,
+               char *buf, const int width)
+{
+    cachedCharSeq roSeq = get_cachedXStringSet_elt(cache, i);
+    if (roSeq.length > width)
+        return NULL;
+    strncpy(buf, roSeq.seq, roSeq.length);
+    buf[roSeq.length] = '\0';
+    return buf;
+}
+
+SEXP
+write_phred_quality(SEXP id, SEXP quality, 
+            SEXP fname, SEXP fmode, SEXP max_width)
+{
+    if (!(IS_S4_OBJECT(id) && 
+          strcmp(get_classname(id), "BStringSet") == 0))
+        Rf_error("'%s' must be '%s'", "id", "BStringSet");
+    if (!(IS_S4_OBJECT(quality) && 
+          strcmp(get_classname(quality), "BStringSet") == 0))
+        Rf_error("'%s' must be '%s'", "quality", "BStringSet");
+    const int len = get_XStringSet_length(id);
+    if ((len != get_XStringSet_length(quality)))
+        Rf_error("length() of %s must all be equal",
+                 "'id', 'quality'");
+    if (!(IS_CHARACTER(fname) && LENGTH(fname) == 1)) /* FIXME: nzchar */
+        Rf_error("'%s' must be '%s'", "file", "character(1)");
+    if (!(IS_CHARACTER(fmode) && LENGTH(fmode) == 1)) /* FIXME nchar()<3 */
+        Rf_error("'%s' must be '%s'", "mode", "character(1)");
+    if (!(IS_INTEGER(max_width) && LENGTH(max_width) == 1 &&
+          INTEGER(max_width)[0] >= 0))
+        Rf_error("'%s' must be %s", "max_width", "'integer(1)', >=0");
+    const int width = INTEGER(max_width)[0];
+
+    cachedXStringSet xid = cache_XStringSet(id),
+                     xquality = cache_XStringSet(quality);
+
+    FILE *fout = fopen(CHAR(STRING_ELT(fname, 0)), 
+                       CHAR(STRING_ELT(fmode, 0)));
+    if (fout == NULL)
+        Rf_error("failed to open file '%s'", 
+                 CHAR(STRING_ELT(fname, 0)));
+
+    char *idbuf = (char *) R_alloc(sizeof(char), width + 1),
+        *qualbuf = (char *) R_alloc(sizeof(char), width + 1);
+    int i, j, phredval;
+    for (i = 0; i < len; ++i) {
+        idbuf = _cache_to_char(&xid, i, idbuf, width);
+        if (idbuf == NULL){
+			fclose(fout);
+			Rf_error("failed to write record %d", i + 1);
+		}
+		fprintf(fout, ">%s\n",idbuf);
+        
+        qualbuf = _cache_to_char(&xquality, i, qualbuf, width);
+        if (qualbuf == NULL){
+			fclose(fout);
+			Rf_error("failed to write record %d", i + 1);
+		}
+		j = 0;
+        while(qualbuf[j] != '\0') {
+			if (j != 0) fprintf(fout," ");
+            phredval = CharToPhred(qualbuf[j]);
+	        fprintf(fout, "%i", phredval);
+			j++;
+        }
+		fprintf(fout,"\n");
+    }
+    fclose(fout);
+    return R_NilValue;
+}
+
 
 #ifdef __cplusplus
 }

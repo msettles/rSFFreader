@@ -1,0 +1,16 @@
+CHANGES IN VERSION 1.00
+-----------------------
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+	o rSFFreader is designed to mimic the Illumina interface used in ShortReads
+	specifically SffReads mimics very similarly to ShortRead and SffReadsQ mimics
+	ShortReadQ, at this all functions and methods available in ShortRead for
+	ShortRead and ShortReadQ are available in SffReads and SffReadsQ
+
+NEW FEATURES
+
+    o All features are new
+
+BUG FIXES
+
