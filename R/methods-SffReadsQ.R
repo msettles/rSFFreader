@@ -72,21 +72,21 @@ setReplaceMethod( f="quality",signature="SffReads",
         return (object)
 })
 
-setMethod(reverseComplement, "SffReadsQ",
-          function(x, index, ...)
-          {
-	        if (missing(index)) index <- seq.int(1L,length(object))
-			if (is.logical(index)) index <- which(index)
-			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
-			newsff <- x
-			sread(newsff)[index] <- reverseComplement(sread(newsff,clipmode="Raw")[index])
-			quality(newsff)[index] <- reverse(quality(quality(newsff,clipmode="Raw"))[index])
-			qualityClip(newsff)[index] <- IRange(start=width(newsff@sread[index]) - start(qualityClip(newsff)[index]),
-												 end  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])
-			start(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - start(adapterClip(newsff)[index])
-			end(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - end(adapterClip(newsff)[index])
-			newsff
-          })
+#setMethod(reverseComplement, "SffReadsQ",
+#          function(x, index, ...)
+#          {
+#	        if (missing(index)) index <- seq.int(1L,length(object))
+#			if (is.logical(index)) index <- which(index)
+#			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+#			newsff <- x
+#			sread(newsff)[index] <- reverseComplement(sread(newsff,clipmode="Raw")[index])
+#			quality(newsff)[index] <- reverse(quality(quality(newsff,clipmode="Raw"))[index])
+#			qualityClip(newsff)[index] <- IRanges(start=width(newsff@sread[index]) - start(qualityClip(newsff)[index]),
+#												 end  =width(newsff@sread[index]) - end(qualityClip(newsff)[index]))
+#			start(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - start(adapterClip(newsff)[index])
+#			end(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - end(adapterClip(newsff)[index])
+#			newsff
+#         })
 
 
 setMethod(pairwiseAlignment, "SffReadsQ",
