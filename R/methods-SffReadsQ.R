@@ -39,7 +39,7 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
 "quality" <- function(object, clipmode, ...){
 	if (inherits(object,"SffReadsQ")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipMode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -79,12 +79,12 @@ setMethod(reverseComplement, "SffReadsQ",
 			if (is.logical(index)) index <- which(index)
 			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
 			newsff <- x
-			sread(newsff)[index] <- reverseComplement(sread(newsff,clipMode="Raw")[index])
-			quality(quality(newsff))[index] <- reverse(quality(quality(newsff,clipMode="Raw"))[index])
-			start(qualityClip(newsff)[index]) <- width(sread,clipMode="Raw") - start(qualityClip(newsff)[index])
-			end(qualityClip(newsff)[index]) <- width(sread,clipMode="Raw") - end(qualityClip(newsff)[index])
-			start(adapterClip(newsff)[index]) <- width(sread,clipMode="Raw") - start(adapterClip(newsff)[index])
-			end(adapterClip(newsff)[index]) <- width(sread,clipMode="Raw") - end(adapterClip(newsff)[index])
+			sread(newsff)[index] <- reverseComplement(sread(newsff,clipmode="Raw")[index])
+			quality(newsff)[index] <- reverse(quality(quality(newsff,clipmode="Raw"))[index])
+			qualityClip(newsff)[index] <- IRange(start=width(newsff@sread[index]) - start(qualityClip(newsff)[index]),
+												 end  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])
+			start(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - start(adapterClip(newsff)[index])
+			end(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - end(adapterClip(newsff)[index])
 			newsff
           })
 

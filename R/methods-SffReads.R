@@ -34,10 +34,10 @@ setMethod(.sffValidity, "SffReads", function(object) {
         qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
 }
 
-"sread" <- function(object, clipMode,...){
+"sread" <- function(object, clipmode,...){
 	if (inherits(object,"SffReads")){
-		if (missing(clipMode)) { clipMode <- clipMode(object) }
-		if(!(clipMode %in% c("Full","Quality","Raw"))) error("clipMode must be one of Full, Quality, Raw")
+		if (missing(clipmode)) { clipmode <- clipMode(object) }
+		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -52,7 +52,7 @@ setMethod(.sffValidity, "SffReads", function(object) {
 			clipR <- pmax(clipL,clipR)
 			subseq(object@sread,start=clipL,end=clipR)
 		}
-		switch(clipMode,
+		switch(clipmode,
 		    "Full"=clipFull(object),
 		    "Quality"=clipQuality(object),
 		    "Raw"=object@sread)
