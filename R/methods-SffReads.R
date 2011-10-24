@@ -34,23 +34,25 @@ setMethod(.sffValidity, "SffReads", function(object) {
         qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
 }
 
-"sread" <- function(object, clipmode,...){
+"sread" <- function(object, clipMode,...){
 	if (inherits(object,"SffReads")){
-		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
+		if (missing(clipMode)) { clipMode <- clipMode(object) }
+		if(!(clipMode %in% c("Full","Quality","Raw"))) error("clipMode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
 				ifelse(end(qualityClip(object)) == 0 , width(object@sread),end(qualityClip(object))), 
 				ifelse(end(adapterClip(object)) == 0 , width(object@sread), end(adapterClip(object))) )
+			clipR <- pmax(clipL,clipR) #
 			subseq(object@sread,start=clipL,end=clipR)
 		}
 		clipQuality <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)) )) 
 			clipR <- ifelse(end(qualityClip(object)) == 0 , width(object),end(qualityClip(object)))
+			clipR <- pmax(clipL,clipR)
 			subseq(object@sread,start=clipL,end=clipR)
 		}
-		switch(clipmode,
+		switch(clipMode,
 		    "Full"=clipFull(object),
 		    "Quality"=clipQuality(object),
 		    "Raw"=object@sread)
@@ -74,7 +76,23 @@ setMethod(width, "SffReads", function(x) width(sread(x)))
 
 setMethod(adapterClip, "SffReads", function(object) object@adapterClip)
 
+setReplaceMethod( f="adapterClip",signature="SffReads", 
+    definition=function(object,value){
+	    if (class(value) != "IRanges")
+			error("value must be of type IRanges object")
+        object@adapterClip <-value 
+        return (object)
+})
+
 setMethod(qualityClip, "SffReads", function(object) object@qualityClip)
+
+setReplaceMethod( f="qualityClip",signature="SffReads", 
+    definition=function(object,value){
+	    if (class(value) != "IRanges")
+			error("value must be of type IRanges object")
+        object@qualityClip <-value 
+        return (object)
+})
 
 setMethod(clipMode, "SffReads", function(object) object@clipMode)
 
@@ -85,6 +103,7 @@ setReplaceMethod( f="clipMode",signature="SffReads",
         object@clipMode <-value 
         return (object)
 })
+
 
 ## coerce
 

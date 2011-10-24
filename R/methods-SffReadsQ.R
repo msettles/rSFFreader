@@ -203,7 +203,7 @@ setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, mode="w", 
     max_width <- max(c(unique(width(names(sread(object)))),
                        unique(width(sread(object))),
                        unique(width(quality(object)))))
-    write.XStringSet(sread(object), paste(file,"fasta",sep="."), ..., format="fasta")
+    write.XStringSet(sread(object), paste(file,"fasta",sep="."), ..., format="fasta") ##
     writePhredQual(object, paste(file,"fasta.qual",sep="."), mode, max_width)
     invisible(length(object))
 })
