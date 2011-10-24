@@ -17,6 +17,9 @@ setGeneric("writePhredQual", function(object, file, mode="w", ...)
 setGeneric("writeFastaQual", function(object, file, mode="w", ...)
            standardGeneric("writeFastaQual"))
 
-setGeneric("clipMode<-",function(object,value) {standardGeneric("clipMode<-")} )
+setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
+setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
+
 setGeneric("qualityClip<-",function(object,value) {standardGeneric("qualityClip<-")} )
 setGeneric("adapterClip<-",function(object,value) {standardGeneric("adapterClip<-")} )
+setGeneric("clipMode<-",function(object,value) {standardGeneric("clipMode<-")} )

@@ -84,6 +84,15 @@ setReplaceMethod( f="adapterClip",signature="SffReads",
         return (object)
 })
 
+setReplaceMethod( f="sread",signature="SffReads", 
+    definition=function(object,value){
+	    if (class(value) != "DNAStringSet")
+			error("value must be of type DNAStringSet object")
+#TODO: More Checks
+        object@sread <-value 
+        return (object)
+})
+
 setMethod(qualityClip, "SffReads", function(object) object@qualityClip)
 
 setReplaceMethod( f="qualityClip",signature="SffReads", 

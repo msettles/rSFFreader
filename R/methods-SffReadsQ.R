@@ -39,17 +39,19 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
 "quality" <- function(object, clipmode, ...){
 	if (inherits(object,"SffReadsQ")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipMode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
 				ifelse(end(qualityClip(object)) == 0 , width(object@quality),end(qualityClip(object))), 
 				ifelse(end(adapterClip(object)) == 0 , width(object@quality), end(adapterClip(object))) )
+			clipR <- pmax(clipL,clipR) #
 			FastqQuality(subseq(quality(object@quality),start=clipL,end=clipR))
 		}
 		clipQuality <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)) )) 
 			clipR <- ifelse(end(qualityClip(object)) == 0 , width(object),end(qualityClip(object)))
+			clipR <- pmax(clipL,clipR) #
 			FastqQuality(subseq(quality(object@quality),start=clipL,end=clipR))
 		}
 		switch(clipmode,
@@ -58,6 +60,34 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
 		    "Raw"=object@quality)
 	} else object@quality
 }
+
+
+setReplaceMethod( f="quality",signature="SffReads", 
+    definition=function(object,value){
+	    if (class(value) == "BStringSet") value <- FastqQuality(value)
+	    if (class(value) != "FastqQuality")
+			error("value must be of type BStringSet or FastqQuality object")
+#TODO: More Checks
+        object@quality <-value 
+        return (object)
+})
+
+setMethod(reverseComplement, "SffReadsQ",
+          function(x, index, ...)
+          {
+	        if (missing(index)) index <- seq.int(1L,length(object))
+			if (is.logical(index)) index <- which(index)
+			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+			newsff <- x
+			sread(newsff)[index] <- reverseComplement(sread(newsff,clipMode="Raw")[index])
+			quality(quality(newsff))[index] <- reverse(quality(quality(newsff,clipMode="Raw"))[index])
+			start(qualityClip(newsff)[index]) <- width(sread,clipMode="Raw") - start(qualityClip(newsff)[index])
+			end(qualityClip(newsff)[index]) <- width(sread,clipMode="Raw") - end(qualityClip(newsff)[index])
+			start(adapterClip(newsff)[index]) <- width(sread,clipMode="Raw") - start(adapterClip(newsff)[index])
+			end(adapterClip(newsff)[index]) <- width(sread,clipMode="Raw") - end(adapterClip(newsff)[index])
+			newsff
+          })
+
 
 setMethod(pairwiseAlignment, "SffReadsQ",
           function(pattern, subject, ...)
@@ -118,8 +148,8 @@ setMethod(narrow, "SffReadsQ",
     initialize(x,
                sread=narrow(sread(x), start, end, width, use.names),
                quality=narrow(quality(x), start, end, width, use.names),
-               qualityClip=narrow(qualityClip(x),start,end,width,use.names),
-               adapterClip=narrow(adapterClip(x),start,end,width,use.names),
+               qualityClip=qualityClip(x),
+               adapterClip=adapterClip(x),
                header=header(x),clipMode=clipMode(x))
 })
 
