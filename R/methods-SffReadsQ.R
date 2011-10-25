@@ -30,7 +30,7 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
     
     if (class(quality) == "BStringSet") 
         quality <- FastqQuality(quality)
-    if (class(quality) != "FastqQuality") error("quality slot must be of type FastqQuality or BStringSet")
+    if (class(quality) != "FastqQuality") stop("quality slot must be of type FastqQuality or BStringSet")
 
     new("SffReadsQ", header=header, sread=sread, quality=quality, 
         qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
@@ -39,7 +39,7 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
 "quality" <- function(object, clipmode, ...){
 	if (inherits(object,"SffReadsQ")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% c("Full","Quality","Raw"))) stop("clipmode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -66,27 +66,30 @@ setReplaceMethod( f="quality",signature="SffReads",
     definition=function(object,value){
 	    if (class(value) == "BStringSet") value <- FastqQuality(value)
 	    if (class(value) != "FastqQuality")
-			error("value must be of type BStringSet or FastqQuality object")
+			stop("value must be of type BStringSet or FastqQuality object")
 #TODO: More Checks
         object@quality <-value 
         return (object)
 })
 
-#setMethod(reverseComplement, "SffReadsQ",
-#          function(x, index, ...)
-#          {
-#	        if (missing(index)) index <- seq.int(1L,length(object))
-#			if (is.logical(index)) index <- which(index)
-#			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
-#			newsff <- x
-#			sread(newsff)[index] <- reverseComplement(sread(newsff,clipmode="Raw")[index])
-#			quality(newsff)[index] <- reverse(quality(quality(newsff,clipmode="Raw"))[index])
-#			qualityClip(newsff)[index] <- IRanges(start=width(newsff@sread[index]) - start(qualityClip(newsff)[index]),
-#												 end  =width(newsff@sread[index]) - end(qualityClip(newsff)[index]))
-#			start(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - start(adapterClip(newsff)[index])
-#			end(adapterClip(newsff)[index]) <- width(newsff@sread[index]) - end(adapterClip(newsff)[index])
-#			newsff
-#         })
+setMethod(reverseComplement, "SffReadsQ",
+          function(x, index, ...)
+          {
+	        if (missing(index)) index <- seq.int(1L,length(object))
+			if (is.logical(index)) index <- which(index)
+			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+			newsff <- x
+			newsff@sread[index] <- reverseComplement(newsff@sread[index])
+			qual <- quality(newsff@quality)
+			qual[index] <- reverse(quality(newsff@quality)[index])
+			newsff@quality <- FastqQuality(qual)
+			qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
+												 start  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])+1)
+			adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
+												 start  =width(newsff@sread[index]) - end(adapterClip(newsff)[index])+1)
+
+			newsff
+         })
 
 
 setMethod(pairwiseAlignment, "SffReadsQ",
@@ -102,24 +105,24 @@ setMethod(pairwiseAlignment, "SffReadsQ",
 
 setMethod("[", c("SffReadsQ", "missing", "missing"),
           function(x, i, j, ..., drop=NA) 
-	    error("UserSubset:'[' must be called with only subscript 'i'")
+	    stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 setMethod("[", c("SffReadsQ", "missing", "ANY"),
           function(x, i, j, ..., drop=NA)
-		error("UserSubset:'[' must be called with only subscript 'i'")
+		stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 setMethod("[", c("SffReadsQ", "ANY", "ANY"),
           function(x, i, j, ..., drop=NA)
-		error("UserSubset:'[' must be called with only subscript 'i'")
+		stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 .SffReadsQ_subset <- function(x, i, j, ..., drop=TRUE) {
     if (0L != length(list(...)))
-		error("UserSubset:'[' must be called with only subscript 'i'")
-    initialize(x, sread=sread(x)[i],
-               quality=quality(x)[i],
+		stop("UserSubset:'[' must be called with only subscript 'i'")
+    initialize(x, sread=x@sread[i],
+               quality=x@quality[i],
                qualityClip=qualityClip(x)[i],
                adapterClip=adapterClip(x)[i],
 ##TODO:subset header
@@ -132,8 +135,8 @@ setMethod(append, c("SffReadsQ", "SffReadsQ", "missing"),
     function(x, values, after=length(x))
 {
     initialize(x,
-               sread=append(sread(x), sread(values)),
-               quality=append(quality(x), quality(values)),
+               sread=append(x@sread, values@sread),
+               quality=append(x@quality, values@quality),
 			   qualityClip=append(qualityClip(x),qualityClip(values)),
 			   adapterClip=append(adapterClip(x),adapterClip(values)),
 ##TODO:add append headers to methods_SffHeader
@@ -141,50 +144,51 @@ setMethod(append, c("SffReadsQ", "SffReadsQ", "missing"),
 			
 })
 
-###TODO: Fix qualityClip and adapterClip Narrow
-setMethod(narrow, "SffReadsQ",
-    function(x, start=NA, end=NA, width=NA, use.names=TRUE)
-{
-    initialize(x,
-               sread=narrow(sread(x), start, end, width, use.names),
-               quality=narrow(quality(x), start, end, width, use.names),
-               qualityClip=qualityClip(x),
-               adapterClip=adapterClip(x),
-               header=header(x),clipMode=clipMode(x))
-})
-
 setMethod(alphabetByCycle, "SffReadsQ", ShortRead:::.abc_ShortReadQ)
 
 setMethod(alphabetScore, "SffReadsQ", ShortRead:::.forward_objq)
 
-setMethod(trimTailw, "SffReadsQ",
-    function(object, k, a, halfwidth, ..., ranges=FALSE)
-{
 
-    rng <- callGeneric(quality(object), k, a, halfwidth, ...,
-                       ranges=TRUE)
-    if (ranges) rng
-    else narrow(object, 1L, end(rng))[0L != width(rng)]
-})
+###TODO: Fix qualityClip and adapterClip Narrow
+#setMethod(narrow, "SffReadsQ",
+#    function(x, start=NA, end=NA, width=NA, use.names=TRUE)
+#{
+#    initialize(x,
+#               sread=narrow(sread(x), start, end, width, use.names),
+#               quality=narrow(quality(x), start, end, width, use.names),
+#               qualityClip=qualityClip(x),
+#               adapterClip=adapterClip(x),
+#               header=header(x),clipMode=clipMode(x))
+#})
 
-setMethod(trimTails, "SffReadsQ",
-    function(object, k, a, successive=FALSE, ..., ranges=FALSE)
-{
-    rng <- callGeneric(quality(object), k, a, successive,
-                       ..., ranges=TRUE)
-    if (ranges) rng
-    else narrow(object, 1L, end(rng))[0L != width(rng)]
-})
+#setMethod(trimTailw, "SffReadsQ",
+#    function(object, k, a, halfwidth, ..., ranges=FALSE)
+#{
 
-setMethod(trimEnds, "SffReadsQ",
-    function(object, a, left=TRUE, right=TRUE, relation=c("<=", "=="),
-             ..., ranges=FALSE)
-{
-    rng <- callGeneric(quality(object), a, left, right, relation,
-                       ..., ranges=TRUE)
-    if (ranges) rng
-    else narrow(object, start(rng), end(rng))
-})
+#    rng <- callGeneric(quality(object), k, a, halfwidth, ...,
+#                       ranges=TRUE)
+#    if (ranges) rng
+#    else narrow(object, 1L, end(rng))[0L != width(rng)]
+#})
+
+#setMethod(trimTails, "SffReadsQ",
+#    function(object, k, a, successive=FALSE, ..., ranges=FALSE)
+#{
+#    rng <- callGeneric(quality(object), k, a, successive,
+#                       ..., ranges=TRUE)
+#    if (ranges) rng
+#    else narrow(object, 1L, end(rng))[0L != width(rng)]
+#})
+
+#setMethod(trimEnds, "SffReadsQ",
+#    function(object, a, left=TRUE, right=TRUE, relation=c("<=", "=="),
+#             ..., ranges=FALSE)
+#{
+#    rng <- callGeneric(quality(object), a, left, right, relation,
+#                       ..., ranges=TRUE)
+#    if (ranges) rng
+#    else narrow(object, start(rng), end(rng))
+#})
 
 ### Functions to write out data
 

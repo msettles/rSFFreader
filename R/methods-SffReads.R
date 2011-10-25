@@ -37,7 +37,7 @@ setMethod(.sffValidity, "SffReads", function(object) {
 "sread" <- function(object, clipmode,...){
 	if (inherits(object,"SffReads")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) error("clipmode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% c("Full","Quality","Raw"))) stop("clipmode must be one of Full, Quality, Raw")
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -79,7 +79,7 @@ setMethod(adapterClip, "SffReads", function(object) object@adapterClip)
 setReplaceMethod( f="adapterClip",signature="SffReads", 
     definition=function(object,value){
 	    if (class(value) != "IRanges")
-			error("value must be of type IRanges object")
+			stop("value must be of type IRanges object")
         object@adapterClip <-value 
         return (object)
 })
@@ -87,7 +87,7 @@ setReplaceMethod( f="adapterClip",signature="SffReads",
 setReplaceMethod( f="sread",signature="SffReads", 
     definition=function(object,value){
 	    if (class(value) != "DNAStringSet")
-			error("value must be of type DNAStringSet object")
+			stop("value must be of type DNAStringSet object")
 #TODO: More Checks
         object@sread <-value 
         return (object)
@@ -98,7 +98,7 @@ setMethod(qualityClip, "SffReads", function(object) object@qualityClip)
 setReplaceMethod( f="qualityClip",signature="SffReads", 
     definition=function(object,value){
 	    if (class(value) != "IRanges")
-			error("value must be of type IRanges object")
+			stop("value must be of type IRanges object")
         object@qualityClip <-value 
         return (object)
 })
@@ -108,7 +108,7 @@ setMethod(clipMode, "SffReads", function(object) object@clipMode)
 setReplaceMethod( f="clipMode",signature="SffReads", 
     definition=function(object,value){
 	    if (!(value %in% c("Full","Quality","Raw")))
-			error("Unknown clipMode, must be one of 'Full','Quality','Raw'")
+			stop("Unknown clipMode, must be one of 'Full','Quality','Raw'")
         object@clipMode <-value 
         return (object)
 })
@@ -126,23 +126,23 @@ setMethod(pairwiseAlignment, "SffReads",
 
 setMethod("[", c("SffReads", "missing", "missing"),
           function(x, i, j, ..., drop=NA) 
-			error("UserSubset:'[' must be called with only subscript 'i'")
+			stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 setMethod("[", c("SffReads", "missing", "ANY"),
           function(x, i, j, ..., drop=NA)
-			error("UserSubset:'[' must be called with only subscript 'i'")
+			stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 setMethod("[", c("SffReads", "ANY", "ANY"),
           function(x, i, j, ..., drop=NA)
-			error("UserSubset:'[' must be called with only subscript 'i'")
+			stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
 .SffReads_subset <- function(x, i, j, ..., drop=TRUE) {
     if (length(list(...)) != 0L) 
-		error("UserSubset:'[' must be called with only subscript 'i'")
-	initialize(x, sread=sread(x)[i],
+		stop("UserSubset:'[' must be called with only subscript 'i'")
+	initialize(x, sread=x@sread[i],
 	               qualityClip=qualityClip(x)[i],
 	               adapterClip=adapterClip(x)[i],
 	##TODO:subset header
@@ -156,7 +156,7 @@ setMethod(append, c("SffReads", "SffReads", "missing"),
     function(x, values, after=length(x)) 
 {
 	    initialize(x,
-	               sread=append(sread(x), sread(values)),
+	               sread=append(x@sread, values@sread),
 				   qualityClip=append(qualityClip(x),qualityClip(values)),
 				   adapterClip=append(adapterClip(x),adapterClip(values)),
 	##TODO:add append headers to methods_SffHeader
@@ -188,48 +188,47 @@ setMethod(srsort, "SffReads", function(x, ...) {
 		x[srorder(x, ...)]
 })
 
-
 setMethod(tables, "SffReads", function(x, n=50, ...) {
 		callGeneric(sread(x), n=n, ...)
 })
 
 
 ###TODO: Fix qualityClip and adapterClip Narrow
-setMethod(narrow, "SffReads",
-    function(x, start=NA, end=NA, width=NA, use.names=TRUE)
-{
-    initialize(x,
-               sread=narrow(sread(x), start, end, width, use.names),
-               qualityClip=narrow(qualityClip(x),start,end,width,use.names),
-               adapterClip=narrow(adapterClip(x),start,end,width,use.names),
-               header=header(x),clipMode=clipMode(x))
-})
+#setMethod(narrow, "SffReads",
+#    function(x, start=NA, end=NA, width=NA, use.names=TRUE)
+#{
+#    initialize(x,
+#               sread=narrow(sread(x), start, end, width, use.names),
+#               qualityClip=narrow(qualityClip(x),start,end,width,use.names),
+#               adapterClip=narrow(adapterClip(x),start,end,width,use.names),
+#               header=header(x),clipMode=clipMode(x))
+#})
 
 
-setMethod(trimLRPatterns, c(subject="SffReads"),
-    function (Lpattern = "", Rpattern = "", subject, max.Lmismatch =
-              0, max.Rmismatch = 0, with.Lindels = FALSE, with.Rindels
-              = FALSE, Lfixed = TRUE, Rfixed = TRUE, ranges = FALSE)
-{
-    ret <-
-        callGeneric(Lpattern, Rpattern, sread(subject), max.Lmismatch,
-                    max.Rmismatch, with.Lindels, with.Rindels, Lfixed,
-                    Rfixed, ranges=TRUE)
-    if (ranges)
-        ret
-    else 
-        narrow(subject, start(ret), end(ret))
-})
+#setMethod(trimLRPatterns, c(subject="SffReads"),
+#    function (Lpattern = "", Rpattern = "", subject, max.Lmismatch =
+#              0, max.Rmismatch = 0, with.Lindels = FALSE, with.Rindels
+#              = FALSE, Lfixed = TRUE, Rfixed = TRUE, ranges = FALSE)
+#{
+#    ret <-
+#        callGeneric(Lpattern, Rpattern, sread(subject), max.Lmismatch,
+#                    max.Rmismatch, with.Lindels, with.Rindels, Lfixed,
+#                    Rfixed, ranges=TRUE)
+#    if (ranges)
+#        ret
+#    else 
+#        narrow(subject, start(ret), end(ret))
+#})
 
-setMethod(trimEnds, "SffReads",
-    function(object, a, left=TRUE, right=TRUE, relation=c("<=", "=="),
-             ..., ranges=FALSE)
-{
-    rng <- callGeneric(sread(object), a, left, right, relation,
-                       ..., ranges=TRUE)
-    if (ranges) rng
-    else narrow(object, start(rng), end(rng))
-})
+#setMethod(trimEnds, "SffReads",
+#    function(object, a, left=TRUE, right=TRUE, relation=c("<=", "=="),
+#             ..., ranges=FALSE)
+#{
+#    rng <- callGeneric(sread(object), a, left, right, relation,
+#                       ..., ranges=TRUE)
+#    if (ranges) rng
+#    else narrow(object, start(rng), end(rng))
+#})
 
 ## manip
 ## show
