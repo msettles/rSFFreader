@@ -209,7 +209,7 @@ setMethod(writeFastq, "SffReadsQ", function(object, file, mode="w", full=FALSE, 
     invisible(length(object))
 })
 
-setMethod(writePhredQual, "SffReadsQ", function(object, file, mode="w", ...) {
+setMethod(writePhredQual, "SffReadsQ", function(object, filepath, mode="w", ...) {
     if (length(file) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
                        "file", "character(1)")
@@ -225,7 +225,7 @@ setMethod(writePhredQual, "SffReadsQ", function(object, file, mode="w", ...) {
     invisible(length(object))
 })
 
-setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, mode="w", ...) {
+setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, append=FALSE,  ...) {
     if (length(basefilename) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
                        "file", "character(1)")
@@ -237,7 +237,8 @@ setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, mode="w", 
     max_width <- max(c(unique(width(names(sread(object)))),
                        unique(width(sread(object))),
                        unique(width(quality(object)))))
-    write.XStringSet(sread(object), paste(file,"fasta",sep="."), ..., format="fasta") ##
+    write.XStringSet(sread(object), paste(file,"fasta",sep="."),append,format="fasta",...) ##
+    if (append == FALSE){mode="w"}else{mode="a"}
     writePhredQual(object, paste(file,"fasta.qual",sep="."), mode, max_width)
     invisible(length(object))
 })

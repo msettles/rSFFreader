@@ -11,10 +11,10 @@ setGeneric("qualityClip", function(object, ...)
 setGeneric("clipMode", function(object, ...)
            standardGeneric("clipMode"))
 
-setGeneric("writePhredQual", function(object, file, mode="w", ...)
+setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
            standardGeneric("writePhredQual"))
 
-setGeneric("writeFastaQual", function(object, file, mode="w", ...)
+setGeneric("writeFastaQual", function(object, basefilename, append=FALSE, ...)
            standardGeneric("writeFastaQual"))
 
 setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
