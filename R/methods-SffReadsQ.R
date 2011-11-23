@@ -210,13 +210,13 @@ setMethod(writeFastq, "SffReadsQ", function(object, file, mode="w", full=FALSE, 
 })
 
 setMethod(writePhredQual, "SffReadsQ", function(object, filepath, mode="w", ...) {
-    if (length(file) != 1)
+    if (length(filepath) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
                        "file", "character(1)")
-    if (file.exists(file) && mode != "a")
+    if (file.exists(filepath) && mode != "a")
         sprintf("UserArgumentMismatch:file '%s' exists, but mode is not 'a'",
-                       file)
-    file <- path.expand(file)
+                       filepath)
+    file <- path.expand(filepath)
     ## FIXME: different quality types
     max_width <- max(c(unique(width(names(sread(object)))),
                        unique(width(quality(object)))))
@@ -229,6 +229,7 @@ setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, append=FAL
     if (length(basefilename) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
                        "file", "character(1)")
+    if (append == FALSE){mode="w"}else{mode="a"}
     if ((file.exists(paste(basefilename,"fasta",sep=".")) && mode != "a") |
         (file.exists(paste(basefilename,"fasta.qual",sep=".")) && mode != "a"))
         sprintf("UserArgumentMismatch:file '%s' exists, but mode is not 'a'", file)
@@ -238,7 +239,6 @@ setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, append=FAL
                        unique(width(sread(object))),
                        unique(width(quality(object)))))
     write.XStringSet(sread(object), paste(file,"fasta",sep="."),append,format="fasta",...) ##
-    if (append == FALSE){mode="w"}else{mode="a"}
     writePhredQual(object, paste(file,"fasta.qual",sep="."), mode, max_width)
     invisible(length(object))
 })
