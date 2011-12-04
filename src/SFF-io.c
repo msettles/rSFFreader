@@ -683,6 +683,8 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
         }
         data.bases[header.number_of_bases]= '\0';
 
+##TODO: SAMS function to adapter find/clip and assign MID
+
         dataline.length = strlen(data.bases);
         dataline.seq = data.bases;
         if (load_record && loader->load_seq != NULL)
