@@ -1,13 +1,4 @@
 
-readsffheader <- function(filenames,verbose=TRUE) {
-    stopifnot(file.exists(filenames))
-	if (!isTRUEorFALSE(verbose))
-		stop("'verbose' must be TRUE or FALSE")
-	
-	ans <- .Call("read_sff_header", filenames,verbose,"rSFFreader")
-	new("SffHeader", header=ans)
-}
-
 ### Accessor functions
 setMethod(header, 
 	      signature="SffHeader", 

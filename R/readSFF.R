@@ -36,3 +36,11 @@ readsffgeometry <- function(filenames) {
 	return(sffgeometry)
 }
 
+
+readsffheader <- function(filenames,verbose=TRUE) {
+    stopifnot(file.exists(filenames))
+    if (!isTRUEorFALSE(verbose))
+		stop("'verbose' must be TRUE or FALSE")
+	ans <- .Call("read_sff_header", filenames,verbose,"rSFFreader")
+	new("SffHeader", header=ans)
+}

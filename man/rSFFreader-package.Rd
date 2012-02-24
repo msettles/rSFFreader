@@ -1,9 +1,7 @@
 \name{rSFFreader-package}
 \alias{rSFFreader-package}
 \alias{rSFFreader}
-\alias{.SFFBase-class}
-\alias{show,.SFFBase-method}
-\alias{append,.SFFBase,.SFFBase,ANY-method}
+\alias{ANY-method}
 \docType{package}
 \title{
 
@@ -13,8 +11,10 @@
 \description{
 
   Base classes, functions, and methods for representation of
-  high-throughput sequencing data stored in SFF files. Such as 
-  Roche 454 Data and Life Sciences Ion Torrent
+  high-throughput sequencing data stored in SFF files (such as 
+  Roche 454 Data and Life Sciences Ion Torrent). Implementation defined
+  according to http://www.ncbi.nlm.nih.gov/Traces/trace.cgi?cmd=show&f=formats&m=doc&s=formats#sff
+  
 
 }
 \details{
@@ -27,6 +27,6 @@ Matt Settles <msettles@uidaho.edu> and Kyu-chul Cho
 Maintainer: Matt Settles <msettles@uidaho.edu>
 }
 \references{
-There will be one
+Coming Soon
 }
 \keyword{ package }
