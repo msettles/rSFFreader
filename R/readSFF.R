@@ -31,7 +31,7 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
 ## Returns a list of size 2
 readsffgeometry <- function(filenames) {
 	stopifnot(file.exists(filenames))
- 	sffgeometry <- .Call("read_geometry", filenames,"rSFFreader")
+ 	sffgeometry <- .Call("sff_geometry", filenames,"rSFFreader")
     names(sffgeometry) <- c("nReads","Read_Widths")
 	return(sffgeometry)
 }
