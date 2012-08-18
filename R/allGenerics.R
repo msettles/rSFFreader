@@ -14,11 +14,13 @@ setGeneric("clipMode", function(object, ...)
 setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
            standardGeneric("writePhredQual"))
 
+## breaks when a file already exists, doesn't overwrite
 setGeneric("writeFastaQual", function(object, basefilename, append=FALSE, ...)
            standardGeneric("writeFastaQual"))
 
 setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
 setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
+## ADD in id<- and/or names<-
 
 setGeneric("qualityClip<-",function(object,value) {standardGeneric("qualityClip<-")} )
 setGeneric("adapterClip<-",function(object,value) {standardGeneric("adapterClip<-")} )
