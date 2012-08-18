@@ -1,4 +1,4 @@
-
+f
 ## Inspector
 setMethod(.sffValidity, "SffReadsQ", function(object) {
     msg <- NULL
