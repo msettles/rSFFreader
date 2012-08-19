@@ -67,8 +67,15 @@ setMethod(writeFasta, "SffReads",
 })
 
 ### Accessor functions
+setMethod(names, "SffReads", function(x) names(x@sread))
+
+setReplaceMethod( f="names",signature="SffReads",
+    definition=function(x,value){names(x@sread) <- value; return(x)})
 
 setMethod(id, "SffReads", function(object) BStringSet(names(object@sread)))
+
+setReplaceMethod( f="id",signature="SffReads",
+                  definition=function(x,value){names(x@sread) <- value; return(x)})
 
 setMethod(length, "SffReads", function(x) length(sread(x)))
 
