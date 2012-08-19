@@ -75,7 +75,7 @@ setReplaceMethod( f="names",signature="SffReads",
 setMethod(id, "SffReads", function(object) BStringSet(names(object@sread)))
 
 setReplaceMethod( f="id",signature="SffReads",
-                  definition=function(x,value){names(x@sread) <- value; return(x)})
+   definition=function(x,value){names(x@sread) <- value; return(x)})
 
 setMethod(length, "SffReads", function(x) length(sread(x)))
 
