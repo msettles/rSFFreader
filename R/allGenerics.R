@@ -18,6 +18,7 @@ setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
 setGeneric("writeFastaQual", function(object, basefilename, append=FALSE, ...)
            standardGeneric("writeFastaQual"))
 
+setGeneric("id<-",function(x,value) {standardGeneric("id<-")})
 setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
 setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
 ## ADD in id<- and/or names<-
