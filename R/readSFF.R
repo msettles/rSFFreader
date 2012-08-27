@@ -17,8 +17,8 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
 		stop("'use.names' must be TRUE or FALSE")
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
-	
-	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+	lkup_seq <- get_xsbasetypes_conversion_lookup("B","DNA")
+#	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"rSFFreader")
 	if (use.qualities){
     	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],

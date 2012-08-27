@@ -241,8 +241,7 @@ setMethod(tables, "SffReads", function(x, n=50, ...) {
 ## show
 setMethod(show, "SffReads", function(object) {
     callNextMethod()
-    wd <- sort(unique(width(object)))
-    if (length(wd)>2) wd <- paste(range(wd), collapse="..")
+    wd <- paste(range(width(object)), collapse="..")
     cat("length:", length(object), "reads; width:", wd, "basepair; clipping mode:", clipMode(object), "\n")
 })
 
