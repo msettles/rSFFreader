@@ -10,7 +10,7 @@ setMethod(show,
 	      signature="SffHeader",
 	      function(object) {
             callNextMethod()
-            sapply(header(object), function(x) cat("file:",x$filename,"; number of reads:",x$number_of_reads,"; numer of flows:",x$number_of_flows,"\n"))
+#            sapply(header(object), function(x) cat("file:",x$filename,"; number of reads:",x$number_of_reads,"; numer of flows:",x$number_of_flows,"\n"))
 })
 
 ## detail
