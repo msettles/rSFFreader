@@ -115,6 +115,7 @@ setMethod("[", c("SffReadsQ", "ANY", "ANY"),
 		stop("UserSubset:'[' must be called with only subscript 'i'")
 )
 
+
 .SffReadsQ_subset <- function(x, i, j, ..., drop=TRUE) {
     if (0L != length(list(...)))
 		stop("UserSubset:'[' must be called with only subscript 'i'")
