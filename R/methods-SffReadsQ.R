@@ -66,29 +66,27 @@ setReplaceMethod( f="quality",signature="SffReads",
 	    if (class(value) == "BStringSet") value <- FastqQuality(value)
 	    if (class(value) != "FastqQuality")
 			stop("value must be of type BStringSet or FastqQuality object")
-#TODO: More Checks
+#TODO: More Checks on IRanges
         object@quality <-value 
         return (object)
 })
 
-setMethod(reverseComplement, "SffReadsQ",
-          function(x, index, ...)
-          {
-	        if (missing(index)) index <- seq.int(1L,length(object))
-			if (is.logical(index)) index <- which(index)
-			if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
-			newsff <- x
-			newsff@sread[index] <- reverseComplement(newsff@sread[index])
-			qual <- quality(newsff@quality)
-			qual[index] <- reverse(quality(newsff@quality)[index])
-			newsff@quality <- FastqQuality(qual)
-			qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
+setMethod(reverseComplement, "SffReadsQ",function(x, index, ...)
+{
+    if (missing(index)) index <- seq.int(1L,length(object))
+		if (is.logical(index)) index <- which(index)
+		if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+		newsff <- x
+		newsff@sread[index] <- reverseComplement(newsff@sread[index])
+		qual <- quality(newsff@quality)
+		qual[index] <- reverse(quality(newsff@quality)[index])
+		newsff@quality <- FastqQuality(qual)
+		qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
 												 start  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])+1)
-			adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
+		adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
 												 start  =width(newsff@sread[index]) - end(adapterClip(newsff)[index])+1)
-
-			newsff
-         })
+		newsff
+})
 
 
 setMethod(pairwiseAlignment, "SffReadsQ",
@@ -212,10 +210,9 @@ setMethod(writePhredQual, "SffReadsQ", function(object, filepath, mode="w", ...)
     if (length(filepath) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
                        "file", "character(1)")
-    if (file.exists(filepath) && mode != "a")
-        sprintf("UserArgumentMismatch:file '%s' exists, but mode is not 'a'",
-                       filepath)
     file <- path.expand(filepath)
+    if (file.exists(file) && mode != "a")
+        sprintf("UserArgumentMismatch:file '%s' exists, but mode is not 'a'",filepath)
     ## FIXME: different quality types
     max_width <- max(c(unique(width(names(sread(object)))),
                        unique(width(quality(object)))))

@@ -1,5 +1,8 @@
 
 ### debug
+#sff <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+#sff <- readsff(system.file("extdata","SmallTorrentTest.sff",package="rSFFreader"))
+
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 #ans <- .Call("read_sff","rSFFreader/inst/test/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
 #new("SffReadsQ",sread=ans[[2]],quality=FastqQuality(ans[[3]]),

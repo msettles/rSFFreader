@@ -34,6 +34,8 @@ setMethod(.sffValidity, "SffReads", function(object) {
         qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
 }
 
+### Accessor functions
+
 "sread" <- function(object, clipmode,...){
 	if (inherits(object,"SffReads")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
@@ -59,59 +61,67 @@ setMethod(.sffValidity, "SffReads", function(object) {
 	} else object@sread
 }
 
-setMethod(writeFasta, "SffReads",
-          function(object, file, ...)
-{
-    dna <- sread(object)
-    callGeneric(dna, file=file, ...)
-})
+### Replace sread object
+setReplaceMethod( f="sread",signature="SffReads", 
+                  definition=function(object,value){
+                    if (class(value) != "DNAStringSet")
+                      stop("value must be of type DNAStringSet object")
+                    #TODO: More Checks, Range objects
+                    object@sread <-value 
+                    return (object)
+                  })
 
-### Accessor functions
+### Print out Read Names
 setMethod(names, "SffReads", function(x) names(x@sread))
 
+### Reassign Read Names
 setReplaceMethod( f="names",signature="SffReads",
     definition=function(x,value){names(x@sread) <- value; return(x)})
 
+### Print out Read Names as BString Set (ShortRead way)
 setMethod(id, "SffReads", function(object) BStringSet(names(object@sread)))
 
+
+### Reassign Read Names
 setReplaceMethod( f="id",signature="SffReads",
    definition=function(x,value){names(x@sread) <- value; return(x)})
 
+### number of sequences
 setMethod(length, "SffReads", function(x) length(sread(x)))
 
+### vector of widths
 setMethod(width, "SffReads", function(x) width(sread(x)))
 
+### IRange object of adapterClip points
 setMethod(adapterClip, "SffReads", function(object) object@adapterClip)
 
+### Reassign adapterClip points
 setReplaceMethod( f="adapterClip",signature="SffReads", 
     definition=function(object,value){
 	    if (class(value) != "IRanges")
 			stop("value must be of type IRanges object")
-        object@adapterClip <-value 
+##TODO: Need to check validity of new clip points
+      object@adapterClip <-value 
         return (object)
 })
 
-setReplaceMethod( f="sread",signature="SffReads", 
-    definition=function(object,value){
-	    if (class(value) != "DNAStringSet")
-			stop("value must be of type DNAStringSet object")
-#TODO: More Checks
-        object@sread <-value 
-        return (object)
-})
-
+### IRange object of qualityClip points
 setMethod(qualityClip, "SffReads", function(object) object@qualityClip)
 
+### Reassign qualityClip Points
 setReplaceMethod( f="qualityClip",signature="SffReads", 
-    definition=function(object,value){
-	    if (class(value) != "IRanges")
-			stop("value must be of type IRanges object")
-        object@qualityClip <-value 
-        return (object)
-})
+                  definition=function(object,value){
+                    if (class(value) != "IRanges")
+                      stop("value must be of type IRanges object")
+##TODO: Need to check validity of new clip points
+                    object@qualityClip <-value 
+                    return (object)
+                  })
 
+### Get the current clipMode for the object
 setMethod(clipMode, "SffReads", function(object) object@clipMode)
 
+### Reset the clip mode
 setReplaceMethod( f="clipMode",signature="SffReads", 
     definition=function(object,value){
 	    if (!(value %in% c("Full","Quality","Raw")))
@@ -120,9 +130,7 @@ setReplaceMethod( f="clipMode",signature="SffReads",
         return (object)
 })
 
-
 ## coerce
-
 setMethod(pairwiseAlignment, "SffReads",
           function(pattern, subject, ...)
           {
@@ -149,7 +157,7 @@ setMethod("[", c("SffReads", "ANY", "ANY"),
 .SffReads_subset <- function(x, i, j, ..., drop=TRUE) {
     if (length(list(...)) != 0L) 
 		stop("UserSubset:'[' must be called with only subscript 'i'")
-	initialize(x, sread=x@sread[i],
+	  initialize(x, sread=x@sread[i],
 	               qualityClip=qualityClip(x)[i],
 	               adapterClip=adapterClip(x)[i],
 	##TODO:subset header
@@ -163,12 +171,33 @@ setMethod(append, c("SffReads", "SffReads", "missing"),
     function(x, values, after=length(x)) 
 {
 	    initialize(x,
-	               sread=append(x@sread, values@sread),
+           sread=append(x@sread, values@sread),
 				   qualityClip=append(qualityClip(x),qualityClip(values)),
 				   adapterClip=append(adapterClip(x),adapterClip(values)),
 	##TODO:add append headers to methods_SffHeader
-	               header=list(header(x),header(value)),clipMode=clipMode(x))
+	         header=list(header(x),header(value)),clipMode=clipMode(x))
 })
+
+setMethod(reverseComplement, "SffReads",function(x, index, ...)
+{
+  if (missing(index)) index <- seq.int(1L,length(object))
+  if (is.logical(index)) index <- which(index)
+  if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+  newsff <- x
+  newsff@sread[index] <- reverseComplement(newsff@sread[index])
+  qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
+                                        start  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])+1)
+  adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
+                                        start  =width(newsff@sread[index]) - end(adapterClip(newsff)[index])+1)
+  newsff
+})
+
+setMethod(writeFasta, "SffReads",
+          function(object, file, ...)
+          {
+            dna <- sread(object)
+            callGeneric(dna, file=file, ...)
+          })
 
 setMethod(alphabetByCycle, "SffReads", ShortRead:::.abc_ShortRead)
 
