@@ -11,9 +11,10 @@ setMethod(.sffValidity, "SffReads", function(object) {
                        lens,lenqc,lenac)
         msg <- c(msg, txt)
     }
+    
 ##TODO: need to add check for IRanges out of bounds
-	if (!(object@clipMode %in% c("Full","Quality","Raw"))){
-		txt <- sprintf("wrong mode type must be one of Full,Quality,Raw")
+	if (!(object@clipMode %in% availableClipModes())){
+		txt <- sprintf("wrong mode type must be one of",paste(availableClipModes(),collapse=" "))
 		msg <- c(msg,txt)
 	}
     if (is.null(msg)) TRUE else msg
@@ -21,17 +22,17 @@ setMethod(.sffValidity, "SffReads", function(object) {
 
 ## constructor
 "SffReads" <- function(sread, qualityClip, adapterClip,
-	clipMode=c("Full", "Quality", "Raw"), header, ...)
+	clipMode=availableClipModes(), header, ...)
 {
     if (missing(header)) header = list()
     clipMode = match.arg(clipMode)
     if (missing(qualityClip) | missing(adapterClip))
-        emptyIR <- IRanges(start=integer(length(sread)),width=integer(length(sread)))
+        emptyIR <- IRanges(start=rep(1,length(sread)),width=width(sread))
     if (missing(qualityClip)) qualityClip=emptyIR
     if (missing(adapterClip)) adapterClipj=emtpyIR
     
     new("SffReads", header=header, sread=sread,
-        qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
+        qualityClip=.solveIRangeSEW(width(sread),qualityClip),adapterClip= .solveIRangeSEW(width(sread), adapterClip), clipMode=clipMode, ...)    
 }
 
 ### Accessor functions
@@ -39,7 +40,7 @@ setMethod(.sffValidity, "SffReads", function(object) {
 "sread" <- function(object, clipmode,...){
 	if (inherits(object,"SffReads")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) stop("clipmode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% availableClipModes())) stop("clipmode must be one of",paste(availableClipModes(),collapse=" "))
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -61,15 +62,15 @@ setMethod(.sffValidity, "SffReads", function(object) {
 	} else object@sread
 }
 
-### Replace sread object
-setReplaceMethod( f="sread",signature="SffReads", 
-                  definition=function(object,value){
-                    if (class(value) != "DNAStringSet")
-                      stop("value must be of type DNAStringSet object")
-                    #TODO: More Checks, Range objects
-                    object@sread <-value 
-                    return (object)
-                  })
+# ### Replace sread object, must worry about clip points
+# setReplaceMethod( f="sread",signature="SffReads", 
+#                   definition=function(object,value){
+#                     if (class(value) != "DNAStringSet")
+#                       stop("value must be of type DNAStringSet object")
+#                     #TODO: More Checks, Range objects
+#                     object@sread <-value 
+#                     return (object)
+#                   })
 
 ### Print out Read Names
 setMethod(names, "SffReads", function(x) names(x@sread))
@@ -87,22 +88,21 @@ setReplaceMethod( f="id",signature="SffReads",
    definition=function(x,value){names(x@sread) <- value; return(x)})
 
 ### number of sequences
-setMethod(length, "SffReads", function(x) length(sread(x)))
+setMethod(length, "SffReads", function(x) length(x@sread))
 
-### vector of widths
-setMethod(width, "SffReads", function(x) width(sread(x)))
+### vector of widths, is dependant on current clipMode
+setMethod(width, "SffReads", function(x) width(solveSffSEW(x)))
 
 ### IRange object of adapterClip points
 setMethod(adapterClip, "SffReads", function(object) object@adapterClip)
 
 ### Reassign adapterClip points
 setReplaceMethod( f="adapterClip",signature="SffReads", 
-    definition=function(object,value){
-	    if (class(value) != "IRanges")
-			stop("value must be of type IRanges object")
-##TODO: Need to check validity of new clip points
-      object@adapterClip <-value 
-        return (object)
+                  definition=function(object,value){
+                    if (class(value) != "IRanges")
+                      stop("value must be of type IRanges object")
+                    object@adapterClip <- .solveIRangeSEW(width(object@sread),value)
+                    return (object)
 })
 
 ### IRange object of qualityClip points
@@ -113,8 +113,21 @@ setReplaceMethod( f="qualityClip",signature="SffReads",
                   definition=function(object,value){
                     if (class(value) != "IRanges")
                       stop("value must be of type IRanges object")
-##TODO: Need to check validity of new clip points
-                    object@qualityClip <-value 
+                    object@qualityClip <- .solveIRangeSEW(width(object@sread)value) 
+                    return (object)
+                  })
+
+
+### IRange object of adapterClip points
+setMethod(customClip, "SffReads", function(object) object@customClip)
+
+### Reassign adapterClip points
+setReplaceMethod( f="customClip",signature="SffReads", 
+                  definition=function(object,value){
+                    if (class(value) != "IRanges")
+                      stop("value must be of type IRanges object")
+                    ##TODO: Need to check validity of new clip points
+                    object@customClip <- .solveIRangeSEW(width(object@sread),value)
                     return (object)
                   })
 
@@ -123,18 +136,13 @@ setMethod(clipMode, "SffReads", function(object) object@clipMode)
 
 ### Reset the clip mode
 setReplaceMethod( f="clipMode",signature="SffReads", 
-    definition=function(object,value){
-	    if (!(value %in% c("Full","Quality","Raw")))
-			stop("Unknown clipMode, must be one of 'Full','Quality','Raw'")
-        object@clipMode <-value 
-        return (object)
-})
-
-## coerce
-setMethod(pairwiseAlignment, "SffReads",
-          function(pattern, subject, ...)
-          {
-            pairwiseAlignment(sread(pattern), subject, ...)
+                  definition=function(object,value){
+                    if (!(value %in% availableClipModes()))
+                      stop("clipMode must be one of ",paste(availableClipModes(),collapse=" "))
+                    if (length(do.call(value,list(object))) == 0)
+                      stop(paste("clipmMode:",value,"is not been set"))
+                    object@clipMode <- value
+                    return (object)
 })
 
 ## subset
@@ -199,12 +207,12 @@ setMethod(writeFasta, "SffReads",
             callGeneric(dna, file=file, ...)
           })
 
-setMethod(alphabetByCycle, "SffReads", ShortRead:::.abc_ShortRead)
-
-setMethod(clean, "SffReads", function(object, ...) {
-    alf <- alphabetFrequency(sread(object), baseOnly=TRUE)
-    object[alf[,'other'] == 0]
-})
+# setMethod(alphabetByCycle, "SffReads", ShortRead:::.abc_ShortRead)
+# 
+# setMethod(clean, "SffReads", function(object, ...) {
+#     alf <- alphabetFrequency(sread(object), baseOnly=TRUE)
+#     object[alf[,'other'] == 0]
+# })
 
 setMethod(dustyScore, "SffReads", function(x, batchSize=NA, ...) {
     callGeneric(sread(x), batchSize=batchSize, ...)
@@ -228,6 +236,13 @@ setMethod(tables, "SffReads", function(x, n=50, ...) {
 		callGeneric(sread(x), n=n, ...)
 })
 
+##### Functions currently available in ShortRead that need implementation here
+# ## coerce
+# setMethod(pairwiseAlignment, "SffReads",
+#           function(pattern, subject, ...)
+#           {
+#             pairwiseAlignment(sread(pattern), subject, ...)
+# })
 
 ###TODO: Fix qualityClip and adapterClip Narrow
 #setMethod(narrow, "SffReads",

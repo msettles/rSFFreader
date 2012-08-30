@@ -1,18 +1,29 @@
 
-### debug
-#sff <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
-#sff <- readsff(system.file("extdata","SmallTorrentTest.sff",package="rSFFreader"))
+### Sample Data
+load454SampleData <- function() {
+  readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+}
+loadIonSampleData <- function() {
+  readsff(system.file("extdata","SmallTorrentTest.sff",package="rSFFreader"))
+}
 
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 #ans <- .Call("read_sff","rSFFreader/inst/test/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
 #new("SffReadsQ",sread=ans[[2]],quality=FastqQuality(ans[[3]]),
 #  qualityClip=ans[[4]],adapterClip=ans[[5]],clipMode="Full",header=ans[[1]])
 
+### Some clip points (specifically adapter clip points) will have 0 values, reset to full length)
+.fixSFFclipPoints2Iranges <- function(widths,IR){
+  clipL <- pmax(1, start(IR)) 
+  clipR <- ifelse(end(IR) == 0 , widths,end(IR))
+  clipR <- pmin(widths,clipR)
+  return(solveUserSEW(widths,clipL,clipR))  
+}
+
 ## functions 
 ## returns the contents of the SFF file into either a SffReads or SffReadsQ class, which acts and behaves similar to
 ## the ShortRead and ShortReadQ classes from package ShortRead
 readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Full","Quality","Raw"), verbose=TRUE){
-
     if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
     stopifnot(file.exists(filenames))
     clipMode <- match.arg(clipMode)
@@ -20,14 +31,17 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
 		stop("'use.names' must be TRUE or FALSE")
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
-	lkup_seq <- get_xsbasetypes_conversion_lookup("B","DNA")
-#	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"rSFFreader")
+  widths <- width(ans[["sread"]])
 	if (use.qualities){
     	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
-	    qualityClip=ans[["qualityClip"]],adapterClip=ans[["adapterClip"]],clipMode=clipMode,header=ans[["header"]])
+                qualityClip=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterClip=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+                clipMode=clipMode,header=ans[["header"]])
     } else {
-    	SffReads(ans[["sread"]],ans[["qualityClip"]],ans[["adapterClip"]],clipMode,ans[["header"]])
+    	SffReads(ans[["sread"]],
+               .fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterClip=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+               clipMode=clipMode,ans[["header"]])
     }
 }
 

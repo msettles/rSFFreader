@@ -18,7 +18,7 @@ setMethod(.sffValidity, "SffReadsQ", function(object) {
 
 ## constructor
 SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
-	clipMode=c("Full", "Quality", "Raw"), header, ...)
+	clipMode=availableClipModes(), header, ...)
 {
     if (missing(header)) header = list()
     clipMode = match.arg(clipMode)
@@ -32,13 +32,21 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
     if (class(quality) != "FastqQuality") stop("quality slot must be of type FastqQuality or BStringSet")
 
     new("SffReadsQ", header=header, sread=sread, quality=quality, 
-        qualityClip=qualityClip, adapterClip=adapterClip, clipMode=clipMode, ...)    
+        qualityClip=.solveIRangeSEW(width(sread),qualityClip),adapterClip= .solveIRangeSEW(width(sread), adapterClip), clipMode=clipMode, ...)    
 }
 
 "quality" <- function(object, clipmode, ...){
 	if (inherits(object,"SffReadsQ")){
 		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% c("Full","Quality","Raw"))) stop("clipmode must be one of Full, Quality, Raw")
+		if(!(clipmode %in% availableClipModes())) stop("clipmode must be one of Full, Quality, Raw")
+		clipFull <- function(object){
+		  clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
+		  clipR <- pmin( 
+		    ifelse(end(qualityClip(object)) == 0 , width(object@quality),end(qualityClip(object))), 
+		    ifelse(end(adapterClip(object)) == 0 , width(object@quality), end(adapterClip(object))) )
+		  clipR <- pmax(clipL,clipR) #
+		  FastqQuality(subseq(quality(object@quality),start=clipL,end=clipR))
+		}
 		clipFull <- function(object){
 			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
 			clipR <- pmin( 
@@ -48,25 +56,25 @@ SffReadsQ <- function(sread, quality, qualityClip, adapterClip,
 			FastqQuality(subseq(quality(object@quality),start=clipL,end=clipR))
 		}
 		clipQuality <- function(object){
-			clipL <- pmax(1, pmax(start(qualityClip(object)) )) 
+			clipL <- pmax(1, start(qualityClip(object))) 
 			clipR <- ifelse(end(qualityClip(object)) == 0 , width(object),end(qualityClip(object)))
 			clipR <- pmax(clipL,clipR) #
 			FastqQuality(subseq(quality(object@quality),start=clipL,end=clipR))
 		}
 		switch(clipmode,
+        "Custom" = clipCustom(object),
 		    "Full"=clipFull(object),
 		    "Quality"=clipQuality(object),
 		    "Raw"=object@quality)
 	} else object@quality
 }
 
-
 setReplaceMethod( f="quality",signature="SffReads", 
     definition=function(object,value){
 	    if (class(value) == "BStringSet") value <- FastqQuality(value)
 	    if (class(value) != "FastqQuality")
 			stop("value must be of type BStringSet or FastqQuality object")
-#TODO: More Checks on IRanges
+#TODO: More Checks on IRanges, length, names, etc.
         object@quality <-value 
         return (object)
 })
@@ -89,14 +97,14 @@ setMethod(reverseComplement, "SffReadsQ",function(x, index, ...)
 })
 
 
-setMethod(pairwiseAlignment, "SffReadsQ",
-          function(pattern, subject, ...)
-          {
-            mc <- as.list(match.call())
-            if (is.null(mc$patternQuality))
-              mc$patternQuality <- quality(quality(pattern))
-            do.call(callNextMethod, c(list(pattern, subject), mc))
-          })
+#setMethod(pairwiseAlignment, "SffReadsQ",
+#          function(pattern, subject, ...)
+#          {
+#            mc <- as.list(match.call())
+#            if (is.null(mc$patternQuality))
+#               mc$patternQuality <- quality(quality(pattern))
+#             do.call(callNextMethod, c(list(pattern, subject), mc))
+#           })
 
 ## subset
 
@@ -135,16 +143,16 @@ setMethod(append, c("SffReadsQ", "SffReadsQ", "missing"),
     initialize(x,
                sread=append(x@sread, values@sread),
                quality=append(x@quality, values@quality),
-			   qualityClip=append(qualityClip(x),qualityClip(values)),
-			   adapterClip=append(adapterClip(x),adapterClip(values)),
+			         qualityClip=append(qualityClip(x),qualityClip(values)),
+			         adapterClip=append(adapterClip(x),adapterClip(values)),
 ##TODO:add append headers to methods_SffHeader
                header=list(header(x),header(value)),clipMode=clipMode(x))
 			
 })
 
-setMethod(alphabetByCycle, "SffReadsQ", ShortRead:::.abc_ShortReadQ)
+#setMethod(alphabetByCycle, "SffReadsQ", ShortRead::.abc_ShortReadQ)
 
-setMethod(alphabetScore, "SffReadsQ", ShortRead:::.forward_objq)
+#setMethod(alphabetScore, "SffReadsQ", ShortRead:::.forward_objq)
 
 
 ###TODO: Fix qualityClip and adapterClip Narrow
@@ -189,7 +197,6 @@ setMethod(alphabetScore, "SffReadsQ", ShortRead:::.forward_objq)
 #})
 
 ### Functions to write out data
-
 setMethod(writeFastq, "SffReadsQ", function(object, file, mode="w", full=FALSE, ...) {
     if (length(file) != 1)
         sprintf("UserArgumentMismatch:'%s' must be '%s'",
@@ -231,7 +238,7 @@ setMethod(writeFastaQual, "SffReadsQ", function(object, basefilename, append=FAL
     if ((file.exists(paste(basefilename,"fasta",sep=".")) && mode != "a") |
         (file.exists(paste(basefilename,"fasta.qual",sep=".")) && mode != "a"))
         sprintf("Warning:file '%s' exists, but mode is not 'a'", file)
-    ## FIXME: different quality types
+    ## FIXME: different quality types ??
     max_width <- max(c(unique(width(names(sread(object)))),
                        unique(width(sread(object))),
                        unique(width(quality(object)))))
