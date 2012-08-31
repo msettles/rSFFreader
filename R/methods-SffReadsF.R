@@ -1,5 +1,5 @@
 ##Inspector for flowgrams
-setMethod(.sffValidity, "SffReadsF", function(object)) {
+setMethod(.sffValidity, "SffReadsF", function(object) {
   msg <- NULL
   lenfg <- nrow(object@flowgram) #number of rows in the flowgram
   widfg <- ncol(object@flowgram) #number of columns in the flowgram
@@ -12,9 +12,12 @@ setMethod(.sffValidity, "SffReadsF", function(object)) {
   # 3. Is the length of the seq object itself equal to the number of indices?
   # 4. Is the length of the seq object itself equal to the number of rows in the flowgram?
   
+  
+  
+  
   #number of flow indices should be equal to the number of bases called
   if (header(object[[1]]$number_of_flows_per_read) != widind) {
-    txt <- paste("Mimatch betwen the number of flows in the header and in the ")
+    txt <- paste("Mimatch betwen the number of flows in the header and in the number of flow indices ")
   }
   
   
@@ -32,12 +35,16 @@ setMethod(.sffValidity, "SffReadsF", function(object)) {
     msg <- c(msg, txt) 
   }
   
-  ### add in above for lenfg
-  if (widind != width(object@sread){
+#  ### add in above for lenfg
+  #ind ! width(object@sread){
     
-  }
+#  }
   
-  #output
+#  #output
   if (is.null(msg)) TRUE
-    else msg
-}
+  else msg
+  
+} 
+          
+)
+  

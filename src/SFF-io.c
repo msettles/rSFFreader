@@ -395,7 +395,7 @@ read_sff_header(SEXP files, SEXP verbose)
 }
 
 int
-count_reads_sum(SEXP files)
+count_reads_sum(SEXP files) //
 {
     int i, nfile = LENGTH(files);
     int nreads = 0;
@@ -404,6 +404,20 @@ count_reads_sum(SEXP files)
         nreads += readCommonHeader(CHAR(STRING_ELT(files,i))).number_of_reads;
     }
     return nreads;
+}
+
+int * 
+flowgram_sizes(SEXP files)
+{
+  int i, nfile = LENGTH(files);
+  //int nflows[nfile];
+  int *nflows = (int*) malloc(nfile*sizeof(int));
+  
+  
+  for(i=0; i<nfile; i++) {
+     nflows[i] = readCommonHeader(CHAR(STRING_ELT(files,i))).number_of_flows_per_read;
+  }
+  return nflows;
 }
 /*************************** END SFF Header Functions *************************/
 
@@ -428,6 +442,11 @@ typedef struct sff_loader {
         int start, int width);
     void (*load_aclip)(struct sff_loader *loader,
         int start, int width);
+    void (*load_flowgrams)(struct sff_loader *loader,
+        const int *dataline);
+    void (*load_flow_indices)(struct sff_loader *loader,
+        const int *dataline);
+        
     int nrec;
     void *ext;  /* loader extension (optional) */
 } SFFloader;
@@ -439,6 +458,8 @@ typedef struct sff_loader_ext {
     cachedXVectorList cached_qual;
     IRANGE_VALUES cached_qual_clip;
     IRANGE_VALUES cached_adapt_clip;
+    const int *flowgrams;
+    const int *flow_indices;
     const int *lkup_seq;
     int lkup_length_seq;
     const int *lkup_qual;
@@ -732,11 +753,12 @@ sff_geometry(SEXP files)
 
     // C declarations
     int nrec, nfiles, i, recno, skip, padding_size, fres;
+    int* nflows;
     const char *fname;
     nrec = recno = 0;
-    static const char *names[] = {"number_of_reads","read_lengths"};
+    static const char *names[] = {"number_of_reads","read_lengths", "flowgram_widths"};
     // R declarations
-    SEXP ans, ans_width, eltnm;
+    SEXP ans, ans_width, eltnm, flow_width;
 
     if (!IS_CHARACTER(files))
         Rf_error("'%s' must be '%s'", "files", "character");
@@ -748,6 +770,15 @@ sff_geometry(SEXP files)
     nrec = count_reads_sum(files);
     PROTECT(ans_width = NEW_INTEGER(nrec));
 
+    nflows = flowgram_sizes(files);
+    PROTECT(flow_width = NEW_INTEGER(nfiles));
+    
+    Rprintf("Total number of flows:", nflows[0]);
+    
+    for (i = 0; i < nfiles; i++) {
+      INTEGER(flow_width)[i] = nflows[i];
+    }
+    
     for (i = 0; i < nfiles; ++i) {
         R_CheckUserInterrupt();
         fname = CHAR(STRING_ELT(files, i));
@@ -794,15 +825,16 @@ sff_geometry(SEXP files)
         freeCommonHeader(commonHeader);
         fclose(file);
     }
-    PROTECT(ans = allocVector(VECSXP,2));
-    PROTECT(eltnm = allocVector( STRSXP, 2 ) );
+    PROTECT(ans = allocVector(VECSXP, 3));
+    PROTECT(eltnm = allocVector( STRSXP, 3 ) );
 
-    SET_VECTOR_ELT(ans, 0, ScalarInteger(nrec));
+    SET_VECTOR_ELT(ans, 0, ScalarInteger(nrec)); // also a scalar integer
     SET_VECTOR_ELT(ans, 1, ans_width);
-    for( int i = 0; i < 2; i++ )
-        SET_STRING_ELT( eltnm, i, mkChar( names[i] ) );
+    SET_VECTOR_ELT(ans, 2, flow_width);
+    for( int i = 0; i < 3; i++ )
+        SET_STRING_ELT( eltnm, i, mkChar( names[i] ));
     namesgets( ans, eltnm );
-    UNPROTECT(3);
+    UNPROTECT(4);
     return(ans);
 }
 
@@ -810,11 +842,12 @@ sff_geometry(SEXP files)
 SEXP
 read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose)
 {
-    int i, nfiles, recno,load_seqids,set_verbose, ans_length;
-    SEXP fname, ans_geom, ans_names, header, nms;
+    int i, nfiles, recno,load_seqids,set_verbose, ans_length, flowgram_maxwidth;
+    SEXP fname, ans_geom, ans_names, header, nms, flowgram_width;
     SEXP  ans = R_NilValue, reads = R_NilValue, quals = R_NilValue,
-            qual_clip = R_NilValue, adapt_clip = R_NilValue;
-	SEXP qclip_start, qclip_width, aclip_start, aclip_width;
+            qual_clip = R_NilValue, adapt_clip = R_NilValue,
+            flowgrams = R_NilValue, flow_indices = R_NilValue;
+	  SEXP qclip_start, qclip_width, aclip_start, aclip_width;
     SFF_loaderExt loader_ext;
     SFFloader loader;
 
@@ -826,10 +859,23 @@ read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose
     load_seqids = LOGICAL(use_names)[0];
     set_verbose = LOGICAL(verbose)[0];
     //  Retrieve SFF(s) Geometry
-    PROTECT(ans_geom = sff_geometry(files));
-    ans_length = INTEGER(VECTOR_ELT(ans_geom,0))[0];  //number of READS
+    PROTECT(ans_geom = sff_geometry(files)); // Maintain maximum number of flows
+    ans_length = INTEGER(VECTOR_ELT(ans_geom,0))[0];//number of READS
     if(set_verbose) Rprintf("Total number of reads to be read: %d\n", ans_length);
 
+    flowgram_width = VECTOR_ELT(ans_geom, 2);
+    flowgram_maxwidth = INTEGER(flowgram_width)[0];
+    
+    for (i=1; i<nfiles; i++) 
+    {
+      if (INTEGER(flowgram_width)[i] > flowgram_maxwidth) 
+      {
+        flowgram_maxwidth = INTEGER(flowgram_width)[i];
+      }
+    }
+    
+    Rprintf("Maximum Flowgram Width: %d", flowgram_maxwidth);
+    
     PROTECT(header = read_sff_header(files,verbose));
     PROTECT(reads = alloc_XRawList("DNAStringSet","DNAString",VECTOR_ELT(ans_geom,1)));
     PROTECT(quals = alloc_XRawList("BStringSet","BString",VECTOR_ELT(ans_geom,1)));
@@ -869,20 +915,24 @@ read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose
 	memcpy(INTEGER(aclip_width), loader_ext.cached_adapt_clip.width, sizeof(int) * ans_length);
 	PROTECT(adapt_clip = new_IRanges("IRanges", aclip_start, aclip_width, R_NilValue));
 
-    PROTECT(ans = NEW_LIST(5));
+    PROTECT(ans = NEW_LIST(7));
     SET_VECTOR_ELT(ans, 0, header);
     SET_VECTOR_ELT(ans, 1, reads); /* read */
     SET_VECTOR_ELT(ans, 2, quals); /* quality */
     SET_VECTOR_ELT(ans, 3, qual_clip); /* quality based clip points */
     SET_VECTOR_ELT(ans, 4, adapt_clip); /* adapter based clip points */
+    SET_VECTOR_ELT(ans, 5, flowgrams); /* flowgrams */
+    SET_VECTOR_ELT(ans, 6, flow_indices); /* flow indices across reads */
     UNPROTECT(11);
 
-    PROTECT(nms = NEW_CHARACTER(5));
+    PROTECT(nms = NEW_CHARACTER(7));
     SET_STRING_ELT(nms, 0, mkChar("header"));
-	SET_STRING_ELT(nms, 1, mkChar("sread"));
+	  SET_STRING_ELT(nms, 1, mkChar("sread"));
     SET_STRING_ELT(nms, 2, mkChar("quality"));
     SET_STRING_ELT(nms, 3, mkChar("qualityClip"));
     SET_STRING_ELT(nms, 4, mkChar("adapterClip"));
+    SET_STRING_ELT(nms, 5, mkChar("flowgrams"));
+    SET_STRING_ELT(nms, 6, mkChar("flowIndicies"));
     setAttrib(ans, R_NamesSymbol, nms);
 	UNPROTECT(1);
 

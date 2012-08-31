@@ -1,7 +1,8 @@
 
 ### debug
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-#ans <- .Call("read_sff","rSFFreader/inst/test/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
+lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+ans <- .Call("read_sff","inst/extdata/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
 #new("SffReadsQ",sread=ans[[2]],quality=FastqQuality(ans[[3]]),
 #  qualityClip=ans[[4]],adapterClip=ans[[5]],clipMode="Full",header=ans[[1]])
 
@@ -17,8 +18,7 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
 		stop("'use.names' must be TRUE or FALSE")
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
-	lkup_seq <- get_xsbasetypes_conversion_lookup("B","DNA")
-#	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"rSFFreader")
 	if (use.qualities){
     	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
@@ -28,11 +28,11 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
     }
 }
 
-## Returns a list of size 2
+## Returns a list of size 3
 readsffgeometry <- function(filenames) {
 	stopifnot(file.exists(filenames))
  	sffgeometry <- .Call("sff_geometry", filenames,"rSFFreader")
-    names(sffgeometry) <- c("nReads","Read_Widths")
+    names(sffgeometry) <- c("nReads","Read_Widths", "Flowgram_Widths")
 	return(sffgeometry)
 }
 
