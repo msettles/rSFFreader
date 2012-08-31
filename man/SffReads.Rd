@@ -169,6 +169,14 @@ Class \code{"\linkS4class{.SffReadsBase}"}, directly.
 }
 \examples{
 showClass("SffReads")
-showMethods(class="SffReads", where=getNamespace("SffReads"))
+showMethods(class="SffReads", where=getNamespace("rSFFreader"),
+            inherit=FALSE)
+
+showMethods(class="SffReadsQ", where=getNamespace("rSFFreader"),
+            inherit=FALSE)
+            
+reads <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"), use.qualities=FALSE)
+detail(reads)
+
 }
 \keyword{classes}
