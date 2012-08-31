@@ -14,51 +14,33 @@ setMethod(.sffValidity, "SffReads", function(object) {
     
 ##TODO: need to add check for IRanges out of bounds
 	if (!(object@clipMode %in% availableClipModes())){
-		txt <- sprintf("wrong mode type must be one of",paste(availableClipModes(),collapse=" "))
+		txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=" ")))
 		msg <- c(msg,txt)
 	}
     if (is.null(msg)) TRUE else msg
 })
 
-## constructor
-"SffReads" <- function(sread, qualityClip, adapterClip,
+## constructor, missing customIR for now
+"SffReads" <- function(sread, qualityIR, adapterIR,
 	clipMode=availableClipModes(), header, ...)
 {
     if (missing(header)) header = list()
     clipMode = match.arg(clipMode)
-    if (missing(qualityClip) | missing(adapterClip))
+    if (missing(qualityIR) | missing(adapterIR))
         emptyIR <- IRanges(start=rep(1,length(sread)),width=width(sread))
-    if (missing(qualityClip)) qualityClip=emptyIR
-    if (missing(adapterClip)) adapterClipj=emtpyIR
+    if (missing(qualityIR)) qualityIR=emptyIR
+    if (missing(adapterIR)) adapterIR=emptyIR
     
     new("SffReads", header=header, sread=sread,
-        qualityClip=.solveIRangeSEW(width(sread),qualityClip),adapterClip= .solveIRangeSEW(width(sread), adapterClip), clipMode=clipMode, ...)    
+        qualityIR=.solveIRangeSEW(width(sread),qualityIR),adapterIR= .solveIRangeSEW(width(sread), adapterIR), clipMode=clipMode, ...)    
 }
 
 ### Accessor functions
 
-"sread" <- function(object, clipmode,...){
+"sread" <- function(object, start=NULL,end=NULL,width=NULL,clipmode,...){
 	if (inherits(object,"SffReads")){
-		if (missing(clipmode)) { clipmode <- clipMode(object) }
-		if(!(clipmode %in% availableClipModes())) stop("clipmode must be one of",paste(availableClipModes(),collapse=" "))
-		clipFull <- function(object){
-			clipL <- pmax(1, pmax(start(qualityClip(object)),start(adapterClip(object)) )) 
-			clipR <- pmin( 
-				ifelse(end(qualityClip(object)) == 0 , width(object@sread),end(qualityClip(object))), 
-				ifelse(end(adapterClip(object)) == 0 , width(object@sread), end(adapterClip(object))) )
-			clipR <- pmax(clipL,clipR) #
-			subseq(object@sread,start=clipL,end=clipR)
-		}
-		clipQuality <- function(object){
-			clipL <- pmax(1, pmax(start(qualityClip(object)) )) 
-			clipR <- ifelse(end(qualityClip(object)) == 0 , width(object),end(qualityClip(object)))
-			clipR <- pmax(clipL,clipR)
-			subseq(object@sread,start=clipL,end=clipR)
-		}
-		switch(clipmode,
-		    "Full"=clipFull(object),
-		    "Quality"=clipQuality(object),
-		    "Raw"=object@sread)
+    IR <- solveSffSEW(object,start,end,width,clipmode,...)
+    subseq(object@sread,start=start(IR),end=end(IR))
 	} else object@sread
 }
 
@@ -82,19 +64,15 @@ setReplaceMethod( f="names",signature="SffReads",
 ### Print out Read Names as BString Set (ShortRead way)
 setMethod(id, "SffReads", function(object) BStringSet(names(object@sread)))
 
-
-### Reassign Read Names
-setReplaceMethod( f="id",signature="SffReads",
-   definition=function(x,value){names(x@sread) <- value; return(x)})
-
 ### number of sequences
 setMethod(length, "SffReads", function(x) length(x@sread))
 
 ### vector of widths, is dependant on current clipMode
 setMethod(width, "SffReads", function(x) width(solveSffSEW(x)))
 
+##### Clipping Points
 ### IRange object of adapterClip points
-setMethod(adapterClip, "SffReads", function(object) object@adapterIR)
+setMethod(adapterClip, "SffReads", function(object) .solveIRangeSEW(width(object@sread),object@adapterIR))
 
 ### Reassign adapterClip points
 setReplaceMethod( f="adapterClip",signature="SffReads", 
@@ -106,7 +84,7 @@ setReplaceMethod( f="adapterClip",signature="SffReads",
 })
 
 ### IRange object of qualityClip points
-setMethod(qualityClip, "SffReads", function(object) object@qualityIR)
+setMethod(qualityClip, "SffReads", function(object) .solveIRangeSEW(width(object@sread),object@qualityIR))
   
 ### Reassign qualityClip Points
 setReplaceMethod( f="qualityClip",signature="SffReads", 
@@ -119,9 +97,9 @@ setReplaceMethod( f="qualityClip",signature="SffReads",
 
 
 ### IRange object of adapterClip points
-setMethod(customClip, "SffReads", function(object) object@customIR)
+setMethod(customClip, "SffReads", function(object) .solveIRangeSEW(width(object@sread),object@customIR))
 
-### Reassign adapterClip points
+### Assign customClip points
 setReplaceMethod( f="customClip",signature="SffReads", 
                   definition=function(object,value){
                     if (class(value) != "IRanges")
@@ -131,6 +109,9 @@ setReplaceMethod( f="customClip",signature="SffReads",
                     return (object)
                   })
 
+setMethod(rawClip,"SffReads", function(object) solveUserSEW(width(object@sread)))
+setMethod(fullClip,"SffReads", function(object) solveSffSEW(object,clipMode="full"))
+
 ### Get the current clipMode for the object
 setMethod(clipMode, "SffReads", function(object) object@clipMode)
 
@@ -138,9 +119,9 @@ setMethod(clipMode, "SffReads", function(object) object@clipMode)
 setReplaceMethod( f="clipMode",signature="SffReads", 
                   definition=function(object,value){
                     if (!(value %in% availableClipModes()))
-                      stop("clipMode must be one of ",paste(availableClipModes(),collapse=" "))
-                    if (length(do.call(value,list(object))) == 0)
-                      stop(paste("clipmMode:",value,"is not been set"))
+                      stop("clipMode must be one of ",paste(availableClipModes(),collapse=","))
+                    if (length(do.call(paste(value,"Clip",sep=""),list(object))) == 0)
+                      stop(paste("clipMode:",value,"has not been set"))
                     object@clipMode <- value
                     return (object)
 })
@@ -166,9 +147,10 @@ setMethod("[", c("SffReads", "ANY", "ANY"),
     if (length(list(...)) != 0L) 
 		stop("UserSubset:'[' must be called with only subscript 'i'")
 	  initialize(x, sread=x@sread[i],
-	               qualityClip=qualityClip(x)[i],
-	               adapterClip=adapterClip(x)[i],
-	##TODO:subset header
+	               qualityIR=qualityClip(x)[i],
+	               adapterIR=adapterClip(x)[i],
+	               customIR=if(length(x@customIR) != 0){customClip(x)[i]}else{IRanges()},
+	             ##TODO:subset header
 	               header=header(x),clipMode=clipMode(x))
 }
 
@@ -178,27 +160,40 @@ setMethod("[", c(x="SffReads", i="ANY", j="missing"),
 setMethod(append, c("SffReads", "SffReads", "missing"),
     function(x, values, after=length(x)) 
 {
+      appendCustom <- function(IR1,IR2,width1,width2){
+        if (length(IR1) != 0 & length(IR2) != 0)
+          append(IR1,IR2)
+        else if (length(IR1) != 0 & length(IR2)==0)
+          append(IR1,IRanges(1,width2))
+        else if (length(IR1) == 0 & length(IR2 !=0))
+          append(IRanges(1,width1),IR2)
+        else IRanges()      
+      }
+      
 	    initialize(x,
            sread=append(x@sread, values@sread),
-				   qualityClip=append(qualityClip(x),qualityClip(values)),
-				   adapterClip=append(adapterClip(x),adapterClip(values)),
-	##TODO:add append headers to methods_SffHeader
-	         header=list(header(x),header(value)),clipMode=clipMode(x))
+				   qualityIR=append(qualityClip(x),qualityClip(values)),
+				   adapterIR=append(adapterClip(x),adapterClip(values)),
+	         customIR=appendCustom(x@customIR,values@customIR,width(x),width(values)),
+	         ##TODO:add append headers to methods_SffHeader
+	         header=list(header(x),header(values)),clipMode=clipMode(x))
 })
 
-setMethod(reverseComplement, "SffReads",function(x, index, ...)
-{
-  if (missing(index)) index <- seq.int(1L,length(object))
-  if (is.logical(index)) index <- which(index)
-  if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
-  newsff <- x
-  newsff@sread[index] <- reverseComplement(newsff@sread[index])
-  qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
-                                        start  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])+1)
-  adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
-                                        start  =width(newsff@sread[index]) - end(adapterClip(newsff)[index])+1)
-  newsff
-})
+#### FIX
+# 
+# setMethod(reverseComplement, "SffReads",function(x, index, ...)
+# {
+#   if (missing(index)) index <- seq.int(1L,length(object))
+#   if (is.logical(index)) index <- which(index)
+#   if (!is.numeric(index)) stop("index must be either missing, a logical vector, or numeric vector")
+#   newsff <- x
+#   newsff@sread[index] <- reverseComplement(newsff@sread[index])
+#   qualityClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(qualityClip(newsff)[index])+1,
+#                                         start  =width(newsff@sread[index]) - end(qualityClip(newsff)[index])+1)
+#   adapterClip(newsff)[index] <- IRanges(end=width(newsff@sread[index]) - start(adapterClip(newsff)[index])+1,
+#                                         start  =width(newsff@sread[index]) - end(adapterClip(newsff)[index])+1)
+#   newsff
+# })
 
 ##### Functions currently available in ShortRead that need implementation here
 

@@ -27,9 +27,9 @@ setGeneric("clipMode", function(object, ...)
   standardGeneric("clipMode"))
 setGeneric("clipMode<-",function(object,value) {standardGeneric("clipMode<-")} )
 
-setGeneric("id<-",function(x,value) {standardGeneric("id<-")} )
-setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
-setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
+#setGeneric("id<-",function(x,value) {standardGeneric("id<-")} )
+#setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
+#setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
 
 setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
   standardGeneric("writePhredQual"))

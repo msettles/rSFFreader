@@ -23,10 +23,10 @@ loadIonSampleData <- function() {
 ## functions 
 ## returns the contents of the SFF file into either a SffReads or SffReadsQ class, which acts and behaves similar to
 ## the ShortRead and ShortReadQ classes from package ShortRead
-readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Full","Quality","Raw"), verbose=TRUE){
-    if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
-    stopifnot(file.exists(filenames))
-    clipMode <- match.arg(clipMode)
+readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("full","adapter","quality","raw"), verbose=TRUE){
+  if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
+  stopifnot(file.exists(filenames))
+  clipMode <- match.arg(clipMode)
 	if (!isTRUEorFALSE(use.names))
 		stop("'use.names' must be TRUE or FALSE")
 	if (!isTRUEorFALSE(verbose))
@@ -36,11 +36,11 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Fu
   widths <- width(ans[["sread"]])
 	if (use.qualities){
     	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
-                qualityClip=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterClip=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+                qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
                 clipMode=clipMode,header=ans[["header"]])
     } else {
     	SffReads(ans[["sread"]],
-               .fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterClip=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+               qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
                clipMode=clipMode,ans[["header"]])
     }
 }

@@ -1,6 +1,7 @@
 availableClipModes <- function(x) c("full","adapter","quality","raw","custom")
 
 .solveIRangeSEW <- function(widths,IR){
+  if (length(IR) == 0) stop("IRange object of length 0")
   solveUserSEW(widths,start(IR),end(IR))
 }
 
@@ -17,15 +18,15 @@ availableClipModes <- function(x) c("full","adapter","quality","raw","custom")
   
   clipFull <- function(object){
     clipL <- pmax(start(object@qualityIR),start(object@adapterIR))
-    clipR <- pmin(end(object@qualityIR),end(object@adapterIR)
+    clipR <- pmin(end(object@qualityIR),end(object@adapterIR))
     return(solveUserSEW(width(object@sread),clipL,clipR))
   }
   switch(clipmode,
          "specified" = solveUserSEW(width(object@sread),starts,ends,widths),
          "custom" = .solveIRangeSEW(width(object@sread),object@customIR),
          "full"=clipFull(object),
-         "adapter"=.solveIRangeSEW(width(object@sread),object@adapterIR))
-         "quality"=.solveIRangeSEW(width(object@sread),object@qualityIR,
+         "adapter"=.solveIRangeSEW(width(object@sread),object@adapterIR),
+         "quality"=.solveIRangeSEW(width(object@sread),object@qualityIR),
          "raw"=solveUserSEW(width(object@sread)))
 }
 
