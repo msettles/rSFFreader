@@ -443,9 +443,9 @@ typedef struct sff_loader {
     void (*load_aclip)(struct sff_loader *loader,
         int start, int width);
     void (*load_flowgrams)(struct sff_loader *loader,
-        const int *dataline);
+        const double *flows);
     void (*load_flow_indices)(struct sff_loader *loader,
-        const int *dataline);
+        const int *indices);
         
     int nrec;
     void *ext;  /* loader extension (optional) */
@@ -458,8 +458,8 @@ typedef struct sff_loader_ext {
     cachedXVectorList cached_qual;
     IRANGE_VALUES cached_qual_clip;
     IRANGE_VALUES cached_adapt_clip;
-    const int *flowgrams;
-    const int *flow_indices;
+    double *flowgrams;
+    int *flow_indices;
     const int *lkup_seq;
     int lkup_length_seq;
     const int *lkup_qual;
@@ -547,14 +547,26 @@ static void SFF_load_aclip(SFFloader *loader, int start, int width)
     return;
 }
 
+static void SFF_load_flowgrams(struct sff_loader *loader, const double *flows)
+{
+    return;
+}
+        
+static void SFF_load_indices(struct sff_loader *loader, const int *indices)
+{
+    return;
+}
+
 void freeLoader(SFF_loaderExt loader) {
     free(loader.cached_qual_clip.width);
     free(loader.cached_qual_clip.start);
     free(loader.cached_adapt_clip.width);
     free(loader.cached_adapt_clip.start);
+    free(loader.flow_indices);
+    free(loader.flowgrams);
 }
 
-static SFF_loaderExt new_SFF_loaderExt(SEXP seq, SEXP qual, SEXP lkup_seq, SEXP lkup_qual)
+static SFF_loaderExt new_SFF_loaderExt(SEXP seq, SEXP qual, SEXP lkup_seq, SEXP lkup_qual, int nbases, int nflows)
 {
     SFF_loaderExt loader_ext;
 
@@ -569,6 +581,9 @@ static SFF_loaderExt new_SFF_loaderExt(SEXP seq, SEXP qual, SEXP lkup_seq, SEXP 
     loader_ext.cached_adapt_clip.width = (int *) R_alloc((long) get_XVectorList_length(seq), sizeof(int));
     loader_ext.cached_adapt_clip.start = (int *) R_alloc((long) get_XVectorList_length(seq), sizeof(int));
 
+    loader_ext.flow_indices = (int *) R_alloc((long) get_XVectorList_length(seq)*nbases, sizeof(int));
+    loader_ext.flowgrams = (double *) R_alloc((long) get_XVectorList_length(seq)*nflows, sizeof(double));
+    
     if (lkup_seq == R_NilValue) {
         loader_ext.lkup_seq = NULL;
     } else {
@@ -594,6 +609,8 @@ static SFFloader new_SFF_loader(int load_seqids,
     loader.load_qual = SFF_load_qual;
     loader.load_qclip = SFF_load_qclip;
     loader.load_aclip = SFF_load_aclip;
+    loader.load_flowgrams = SFF_load_flowgrams;
+    loader.load_flow_indices = SFF_load_indices;
     loader.nrec = 0;
     loader.ext = loader_ext;
     return loader;
@@ -772,9 +789,7 @@ sff_geometry(SEXP files)
 
     nflows = flowgram_sizes(files);
     PROTECT(flow_width = NEW_INTEGER(nfiles));
-    
-    Rprintf("Total number of flows:", nflows[0]);
-    
+        
     for (i = 0; i < nfiles; i++) {
       INTEGER(flow_width)[i] = nflows[i];
     }
@@ -842,8 +857,8 @@ sff_geometry(SEXP files)
 SEXP
 read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose)
 {
-    int i, nfiles, recno,load_seqids,set_verbose, ans_length, flowgram_maxwidth;
-    SEXP fname, ans_geom, ans_names, header, nms, flowgram_width;
+    int i, nfiles, recno,load_seqids,set_verbose, ans_length, flowgram_maxwidth, nbases;
+    SEXP fname, ans_geom, ans_names, header, nms, flowgram_width, base_geometry;
     SEXP  ans = R_NilValue, reads = R_NilValue, quals = R_NilValue,
             qual_clip = R_NilValue, adapt_clip = R_NilValue,
             flowgrams = R_NilValue, flow_indices = R_NilValue;
@@ -873,14 +888,18 @@ read_sff(SEXP files, SEXP use_names, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose
         flowgram_maxwidth = INTEGER(flowgram_width)[i];
       }
     }
-    
-    Rprintf("Maximum Flowgram Width: %d", flowgram_maxwidth);
+      
+    base_geometry = VECTOR_ELT(ans_geom, 1);
+    nbases = 0;
+    for (i=0; i < ans_length; i++) {
+      nbases += INTEGER(base_geometry)[i];
+    }
     
     PROTECT(header = read_sff_header(files,verbose));
     PROTECT(reads = alloc_XRawList("DNAStringSet","DNAString",VECTOR_ELT(ans_geom,1)));
     PROTECT(quals = alloc_XRawList("BStringSet","BString",VECTOR_ELT(ans_geom,1)));
  
-    loader_ext = new_SFF_loaderExt(reads, quals, lkup_seq,lkup_qual); //Biostrings/XStringSet_io.c
+    loader_ext = new_SFF_loaderExt(reads, quals, lkup_seq,lkup_qual, nbases, flowgram_maxwidth); //Biostrings/XStringSet_io.c
     loader = new_SFF_loader(load_seqids, &loader_ext); //Biostrings/XStringSet_io.c
 
     recno = 0;

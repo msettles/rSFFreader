@@ -18,4 +18,5 @@ Collate: allClasses.R
          methods-SffHeader.R
          methods-SffReads.R
          methods-SffReadsQ.R
+         methods-SffReadsF.R
          readSFF.R

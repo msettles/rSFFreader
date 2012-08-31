@@ -1,8 +1,8 @@
 
 ### debug
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-ans <- .Call("read_sff","inst/extdata/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
+#lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+#ans <- .Call("read_sff","inst/extdata/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
 #new("SffReadsQ",sread=ans[[2]],quality=FastqQuality(ans[[3]]),
 #  qualityClip=ans[[4]],adapterClip=ans[[5]],clipMode="Full",header=ans[[1]])
 
