@@ -1,4 +1,4 @@
-availableClipModes <- function(x) c("Full","Quality","Raw","Custom")
+availableClipModes <- function(x) c("full","adapter","quality","raw","custom")
 
 .solveIRangeSEW <- function(widths,IR){
   solveUserSEW(widths,start(IR),end(IR))
@@ -11,21 +11,22 @@ availableClipModes <- function(x) c("Full","Quality","Raw","Custom")
     clipmode <- "Specified"
   } else if (!missing(clipMode)) {
     if (!(clipMode %in% availableClipModes()))
-      txt <- sprintf("wrong mode type must be one of Full, Quality, Raw, or Custom")
+      txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=",")))
     clipmode <- clipMode
   } else clipmode <- object@clipMode
   
   clipFull <- function(object){
-    clipL <- pmax(start(qualityClip(object)),start(adapterClip(object)))
-    clipR <- pmin(end(qualityClip(object)),end(adapterClip(object)))
+    clipL <- pmax(start(object@qualityIR),start(object@adapterIR))
+    clipR <- pmin(end(object@qualityIR),end(object@adapterIR)
     return(solveUserSEW(width(object@sread),clipL,clipR))
   }
   switch(clipmode,
-         "Specified" = solveUserSEW(width(object@sread),starts,ends,widths),
-         "Custom" = .solveIRangeSEW(width(object@sread),customClip(object)),
-         "Full"=clipFull(object),
-         "Quality"=.solveIRangeSEW(width(object@sread),qualityClip(object)),
-         "Raw"=solveUserSEW(width(object@sread)))
+         "specified" = solveUserSEW(width(object@sread),starts,ends,widths),
+         "custom" = .solveIRangeSEW(width(object@sread),object@customIR),
+         "full"=clipFull(object),
+         "adapter"=.solveIRangeSEW(width(object@sread),object@adapterIR))
+         "quality"=.solveIRangeSEW(width(object@sread),object@qualityIR,
+         "raw"=solveUserSEW(width(object@sread)))
 }
 
 

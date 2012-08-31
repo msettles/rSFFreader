@@ -4,8 +4,8 @@ setMethod(.sffValidity, "SffReads", function(object) {
 #	cat("## SFFreads Validity ###\n")
     msg <- NULL
     lens <- length(object@sread)
-    lenqc <- length(object@qualityClip)
-    lenac <- length(object@adapterClip)
+    lenqc <- length(object@qualityIR)
+    lenac <- length(object@adapterIR)
     if (length(unique(c(lens,lenqc,lenac))) != 1) {
         txt <- sprintf("mismatch length in sread, qualityClip, or adapterClip: %d %d %d",
                        lens,lenqc,lenac)
@@ -94,32 +94,32 @@ setMethod(length, "SffReads", function(x) length(x@sread))
 setMethod(width, "SffReads", function(x) width(solveSffSEW(x)))
 
 ### IRange object of adapterClip points
-setMethod(adapterClip, "SffReads", function(object) object@adapterClip)
+setMethod(adapterClip, "SffReads", function(object) object@adapterIR)
 
 ### Reassign adapterClip points
 setReplaceMethod( f="adapterClip",signature="SffReads", 
                   definition=function(object,value){
                     if (class(value) != "IRanges")
                       stop("value must be of type IRanges object")
-                    object@adapterClip <- .solveIRangeSEW(width(object@sread),value)
+                    object@adapterIR <- .solveIRangeSEW(width(object@sread),value)
                     return (object)
 })
 
 ### IRange object of qualityClip points
-setMethod(qualityClip, "SffReads", function(object) object@qualityClip)
-
+setMethod(qualityClip, "SffReads", function(object) object@qualityIR)
+  
 ### Reassign qualityClip Points
 setReplaceMethod( f="qualityClip",signature="SffReads", 
                   definition=function(object,value){
                     if (class(value) != "IRanges")
                       stop("value must be of type IRanges object")
-                    object@qualityClip <- .solveIRangeSEW(width(object@sread),value) 
+                    object@qualityIR <- .solveIRangeSEW(width(object@sread),value) 
                     return (object)
                   })
 
 
 ### IRange object of adapterClip points
-setMethod(customClip, "SffReads", function(object) object@customClip)
+setMethod(customClip, "SffReads", function(object) object@customIR)
 
 ### Reassign adapterClip points
 setReplaceMethod( f="customClip",signature="SffReads", 
@@ -127,7 +127,7 @@ setReplaceMethod( f="customClip",signature="SffReads",
                     if (class(value) != "IRanges")
                       stop("value must be of type IRanges object")
                     ##TODO: Need to check validity of new clip points
-                    object@customClip <- .solveIRangeSEW(width(object@sread),value)
+                    object@customIR <- .solveIRangeSEW(width(object@sread),value)
                     return (object)
                   })
 
@@ -200,12 +200,7 @@ setMethod(reverseComplement, "SffReads",function(x, index, ...)
   newsff
 })
 
-setMethod(writeFasta, "SffReads",
-          function(object, file, ...)
-          {
-            dna <- sread(object)
-            callGeneric(dna, file=file, ...)
-          })
+##### Functions currently available in ShortRead that need implementation here
 
 # setMethod(alphabetByCycle, "SffReads", ShortRead:::.abc_ShortRead)
 # 
@@ -213,30 +208,29 @@ setMethod(writeFasta, "SffReads",
 #     alf <- alphabetFrequency(sread(object), baseOnly=TRUE)
 #     object[alf[,'other'] == 0]
 # })
+# 
+# setMethod(dustyScore, "SffReads", function(x, batchSize=NA, ...) {
+#     callGeneric(sread(x), batchSize=batchSize, ...)
+# })
+# 
+# setMethod(srorder, "SffReads", function(x, ...) callGeneric(sread(x), ...))
+# 
+# setMethod(srrank, "SffReads",  function(x, ...) callGeneric(sread(x), ...))
+# 
+# setMethod(srduplicated, "SffReads", function(x, ...) callGeneric(sread(x), ...))
+# 
+# setMethod(srdistance, c("SffReads", "ANY"), function(pattern, subject, ...){
+# 		callGeneric(sread(pattern), subject, ...)
+# })
+# 
+# setMethod(srsort, "SffReads", function(x, ...) {
+# 		x[srorder(x, ...)]
+# })
+# 
+# setMethod(tables, "SffReads", function(x, n=50, ...) {
+# 		callGeneric(sread(x), n=n, ...)
+# })
 
-setMethod(dustyScore, "SffReads", function(x, batchSize=NA, ...) {
-    callGeneric(sread(x), batchSize=batchSize, ...)
-})
-
-setMethod(srorder, "SffReads", function(x, ...) callGeneric(sread(x), ...))
-
-setMethod(srrank, "SffReads",  function(x, ...) callGeneric(sread(x), ...))
-
-setMethod(srduplicated, "SffReads", function(x, ...) callGeneric(sread(x), ...))
-
-setMethod(srdistance, c("SffReads", "ANY"), function(pattern, subject, ...){
-		callGeneric(sread(pattern), subject, ...)
-})
-
-setMethod(srsort, "SffReads", function(x, ...) {
-		x[srorder(x, ...)]
-})
-
-setMethod(tables, "SffReads", function(x, n=50, ...) {
-		callGeneric(sread(x), n=n, ...)
-})
-
-##### Functions currently available in ShortRead that need implementation here
 # ## coerce
 # setMethod(pairwiseAlignment, "SffReads",
 #           function(pattern, subject, ...)
@@ -280,6 +274,13 @@ setMethod(tables, "SffReads", function(x, n=50, ...) {
 #    if (ranges) rng
 #    else narrow(object, start(rng), end(rng))
 #})
+
+setMethod(writeFasta, "SffReads",
+          function(object, file, ...)
+          {
+            dna <- sread(object)
+            callGeneric(dna, file=file, ...)
+          })
 
 ## manip
 ## show
