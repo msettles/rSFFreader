@@ -175,14 +175,13 @@ Class \code{"\linkS4class{.SffReadsBase}"}, by class "SffReads", distance 2.
 }
 \examples{
 showClass("SffReadsQ")
-showMethods(class="SffReadsQ", where=getNamespace("SffReads"),
+showMethods(class="SffReadsQ", where=getNamespace("rSFFreader"),
             inherit=FALSE)
-showMethods(class="SffReads", where=getNamespace("SffReads"),
+showMethods(class="SffReads", where=getNamespace("rSFFreader"),
             inherit=FALSE)
 
-sp <- SolexaPath(system.file('extdata', package='SffReads'))
-rfq <- readFastq(analysisPath(sp), pattern="s_1_sequence.txt")
-quality(rfq)
-quality(trimTails(rfq, 2, "H", successive=TRUE))
+reads <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+quality(reads)
+
 }
 \keyword{classes}
