@@ -2,30 +2,50 @@
 ### debug
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-#ans <- .Call("read_sff","inst/extdata/SmallTest.sff",TRUE,lkup_seq, NULL,TRUE,"rSFFreader")
+#ans <- .Call("read_sff","inst/extdata/SmallTest.sff",TRUE, TRUE, lkup_seq, NULL,TRUE,"rSFFreader")
 #new("SffReadsQ",sread=ans[[2]],quality=FastqQuality(ans[[3]]),
 #  qualityClip=ans[[4]],adapterClip=ans[[5]],clipMode="Full",header=ans[[1]])
 
 ## functions 
 ## returns the contents of the SFF file into either a SffReads or SffReadsQ class, which acts and behaves similar to
 ## the ShortRead and ShortReadQ classes from package ShortRead
-readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("Full","Quality","Raw"), verbose=TRUE){
+readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE, use.flowgrams=FALSE,clipMode=c("Full","Quality","Raw"), verbose=TRUE){
 
-    if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
-    stopifnot(file.exists(filenames))
-    clipMode <- match.arg(clipMode)
-	if (!isTRUEorFALSE(use.names))
-		stop("'use.names' must be TRUE or FALSE")
-	if (!isTRUEorFALSE(verbose))
-		stop("'verbose' must be TRUE or FALSE")
-	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"rSFFreader")
-	if (use.qualities){
-    	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
-	    qualityClip=ans[["qualityClip"]],adapterClip=ans[["adapterClip"]],clipMode=clipMode,header=ans[["header"]])
-    } else {
-    	SffReads(ans[["sread"]],ans[["qualityClip"]],ans[["adapterClip"]],clipMode,ans[["header"]])
-    }
+  if (!use.names) warning ("Currently, use.names is not used.  By default, names will always be returned.")
+  stopifnot(file.exists(filenames))
+  clipMode <- match.arg(clipMode)
+  if (!isTRUEorFALSE(use.names)) {
+    stop("'use.names' must be passed as TRUE or FALSE")
+  }
+  if (!isTRUEorFALSE(verbose)) {
+    stop("'verbose' must be passed as TRUE or FALSE")
+  }
+  lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+  ans <- .Call("read_sff", filenames, use.names, TRUE, TRUE, lkup_seq, NULL, TRUE, "rSFFreader")
+  
+  
+  #WRITE NEW FUNCTION BELOW TO READ SFF FILES WITH FLOWGRAMS  
+  
+#    if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
+#    stopifnot(file.exists(filenames))
+#    clipMode <- match.arg(clipMode)
+#	if (!isTRUEorFALSE(use.names))
+#		stop("'use.names' must be TRUE or FALSE")
+#	if (!isTRUEorFALSE(verbose))
+#		stop("'verbose' must be TRUE or FALSE")
+#	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+#	ans <- .Call("read_sff",filenames,use.names,TRUE,lkup_seq, NULL,verbose,"rSFFreader")
+	
+    #MIMIC THIS FOR FLOWGRAMS
+#    if (use.qualities){
+#    	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
+#	    qualityClip=ans[["qualityClip"]],adapterClip=ans[["adapterClip"]],clipMode=clipMode,header=ans[["header"]])
+#    } else if(use.flowgrams) {
+      #SffReadsF
+      ##NEED TO FIX THIS
+#    } else {
+#    	SffReads(ans[["sread"]],ans[["qualityClip"]],ans[["adapterClip"]],clipMode,ans[["header"]])
+#    }
 }
 
 ## Returns a list of size 3
