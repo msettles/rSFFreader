@@ -1,0 +1,33 @@
+%\VignetteIndexEntry{An introduction to rSFFreader}
+%\VignetteDepends{rSFFreader}
+%\VignetteKeywords{SFF, 454, I/0, Sequencing, HighThroughputSequencing, DataImport}
+%\VignettePackage{rSFFreader}
+\documentclass[11pt]{article}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[authoryear,round]{natbib}
+\bibliographystyle{plainnat}
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
+\author{Matt Settles\footnote{msettles@uidaho.edu}>}
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\title{An introduction to rSFFreader}
+
+\maketitle
+
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+
+
+
+\end{document}
