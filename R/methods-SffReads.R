@@ -270,7 +270,7 @@ setMethod(append, c("SffReads", "SffReads", "missing"),
 #    else narrow(object, start(rng), end(rng))
 #})
 
-setMethod(writeFasta, "SffReads",
+setMethod(writeFasta, c("SffReads"),
           function(object, file, ...)
           {
             dna <- sread(object)

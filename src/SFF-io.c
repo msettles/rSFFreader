@@ -1,4 +1,5 @@
-/* Author: Kyu-Chul Cho (cho@vandals.uidaho.edu)
+/* Author: Matt Settles
+   with original contributtion from:Kyu-Chul Cho (cho@vandals.uidaho.edu)
  * Last Modified: June 9, 2010
  */
 
