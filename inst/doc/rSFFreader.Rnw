@@ -25,8 +25,13 @@
 \tableofcontents
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+The SFF file format has been adopted by both Roche 454 and Ion Torrent next generation sequencing platforms. \Rpackage{rSFFreader} provides 
+functionality for loading sequence, quality scores, and flowgram information from these files. This package has been modeled after the 
+excellent \Rpackage(ShortRead) package released by Martin Morgan. It aims to maintain compatibility with that package while enabling
+direct processing of SFF files.
 
-
+\section{A simple workflow}
+In progress..
 
 
 
