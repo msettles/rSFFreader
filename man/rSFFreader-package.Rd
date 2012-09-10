@@ -2,6 +2,7 @@
 \alias{rSFFreader-package}
 \alias{rSFFreader}
 \alias{ANY-method}
+\alias{.SffBase-class}
 \docType{package}
 \title{
 

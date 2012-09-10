@@ -28,7 +28,7 @@ or from the result of \code{\link{readsff}}.
   }
 }
 \section{Extends}{
-Class \code{"\linkS4class{.SFFBase}"}, directly.
+Class \code{"\linkS4class{.SffBase}"}, directly.
 }
 
 \section{Methods}{

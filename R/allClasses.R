@@ -5,9 +5,9 @@ setGeneric(".sffValidity")
 
 ## Virtual base classes
 
-setClass(".SFFBase")
+setClass(".SffBase")
 
-setClass("SffHeader", contains=".SFFBase",
+setClass("SffHeader", contains=".SffBase",
          representation=representation(
            header="list"),
          prototype=prototype(
@@ -16,7 +16,7 @@ setClass("SffHeader", contains=".SFFBase",
 
 setClass("SffReads", contains="SffHeader",
          representation = representation(
-	       sread="DNAStringSet",
+	         sread="DNAStringSet",
            qualityIR="IRanges",
            adapterIR="IRanges",
            customIR="IRanges",

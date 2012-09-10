@@ -1,7 +1,7 @@
 \name{readsff}
 \alias{readsff}
 
-\title{Read SFF-formatted files}
+\title{Read SFF-formatted files into SffReads or SffReadsQ objects}
 
 \description{
   \code{readsff} reads all sff files specified in \code{filenames}, returning an R object of type \code{\linkS4class{SffReads}} or 
@@ -10,7 +10,7 @@
 }
 
 \usage{
-readsff(filenames, use.qualities=TRUE, use.names=TRUE, clipMode=c("Full","Quality","Raw"), verbose=TRUE)
+readsff(filenames, use.qualities=TRUE, use.names=TRUE, clipMode = c("full", "adapter", "quality", "raw"), verbose=TRUE)
 }
 
 

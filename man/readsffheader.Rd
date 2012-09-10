@@ -19,7 +19,7 @@ readsffheader(filenames, verbose=TRUE)
   
 }
 
-\value{A \code{\linkS4class{SffHeader}} object.} }
+\value{A \code{\linkS4class{SffHeader}} object.}
 
 
 \author{Matt Settles <msettles@uidaho.edu>}

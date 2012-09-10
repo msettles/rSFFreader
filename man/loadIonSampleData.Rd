@@ -12,9 +12,9 @@ load454SampleData()
 }
 
 \arguments{
+None
 }
 
-\value{A \code{\linkS4class{SffReadsQ}} object containing 1000 reads
-with lengths ranging from 5 to 353 basepairs.}
+\value{Loads a small example Life Sciences Ion Torrent dataset (sff file) into a \code{\linkS4class{SffReadsQ}} object containing 1000 reads.}
 
 \author{Matt Settles <msettles@uidaho.edu>}
