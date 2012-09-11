@@ -14,6 +14,8 @@
 \newcommand{\Rfunction}[1]{{\texttt{#1}}}
 \newcommand{\Robject}[1]{{\texttt{#1}}}
 \newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\rSFFreader}{\Rpackage{rSFFreader}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
 
 \author{Matt Settles\footnote{msettles@uidaho.edu}>}
 \begin{document}
@@ -32,6 +34,33 @@ direct processing of SFF files.
 
 \section{A simple workflow}
 In progress..
+
+\section{Exploring \rSFFreader{} objects}
+Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{SffReadsQ} is derived from \Rclass{SffReads} and is very similar with the addition of functionality for storing quality information.
+
+
+The \Rclass{SffReadsQ} has the following slots:
+
+
+\Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
+
+
+\Robject{sread} of class \Rclass{DNAStringSet}
+
+
+\Robject{qualityIR} of class \Rclass{IRanges}
+
+
+\Robject{adapterIR} of class \Rclass{IRanges}
+
+
+\Robject{customIR} of class \Rclass{IRanges}
+
+
+\Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
+
+
+\Robject{header} of class \Rclass{list} which contains details about the SFF header.
 
 
 
