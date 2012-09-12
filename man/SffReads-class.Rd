@@ -31,6 +31,7 @@
 \alias{append, SffReads-method}
 \alias{width, SffReads-method}
 \alias{writeFasta, SffReads-method}
+\alias{hist, SffReads-method}
 \alias{solveSffSEW}
 \alias{adapterClip}
 \alias{adapterClip<-}
@@ -43,6 +44,8 @@
 \alias{qualityClip}
 \alias{qualityClip<-}
 \alias{rawClip}
+\alias{hist}
+
 
 
 \title{Class \code{"SffReads"}. A class for next generation reads stored in

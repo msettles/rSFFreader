@@ -14,7 +14,7 @@ biocViews: DataImport, Sequencing, HighThroughputSequencing
 Collate: allClasses.R
          allGenerics.R
          methods-Misc.R
-         methods-.SFFBase.R
+         methods-SffBase.R
          methods-SffHeader.R
          methods-SffReads.R
          methods-SffReadsQ.R

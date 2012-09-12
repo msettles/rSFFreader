@@ -45,11 +45,3 @@ setMethod(writePhredQual, "FastqQuality", function(object, filepath, mode="w", .
         quality(object), file, mode, max_width)
   invisible(length(object))
 })
-
-
-### Base by cycle plots ###
-"plotBBC" <- function(object)
-{
-  
-  
-}
