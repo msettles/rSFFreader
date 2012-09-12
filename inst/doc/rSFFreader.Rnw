@@ -2,10 +2,11 @@
 %\VignetteDepends{rSFFreader}
 %\VignetteKeywords{SFF, 454, I/0, Sequencing, HighThroughputSequencing, DataImport}
 %\VignettePackage{rSFFreader}
-\documentclass[11pt]{article}
+\documentclass[letter]{article}
 \usepackage{hyperref}
 \usepackage{url}
 \usepackage[authoryear,round]{natbib}
+\usepackage{graphicx}
 \bibliographystyle{plainnat}
 
 \newcommand{\scscst}{\scriptscriptstyle}
@@ -17,12 +18,29 @@
 \newcommand{\rSFFreader}{\Rpackage{rSFFreader}}
 \newcommand{\Rclass}[1]{{\textit{#1}}}
 
-\author{Matt Settles\footnote{msettles@uidaho.edu}>}
+\author{Matt Settles\footnote{msettles@uidaho.edu}}
+\marginparwidth = 0pt
+\hoffset = 0pt
+\marginparsep = 0pt
+\oddsidemargin = 0pt
+\voffset = 0pt
+\textwidth = 6.5in
+\topmargin=0pt
 \begin{document}
+
 \SweaveOpts{concordance=TRUE}
 \title{An introduction to rSFFreader}
 
 \maketitle
+
+<<options,echo=FALSE>>=
+options(width=60)
+@
+
+<<preliminaries>>=
+library("rSFFreader")
+library("xtable")
+@
 
 \tableofcontents
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -33,34 +51,85 @@ excellent \Rpackage(ShortRead) package released by Martin Morgan. It aims to mai
 direct processing of SFF files.
 
 \section{A simple workflow}
-In progress..
+Read in an SFF file:
+@
+%
+<<Reads454>>=
+sff <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+@
+%%
+
+\noindent Accessing the read, quality, and header information:
+<<x1>>=
+sread(sff)
+quality(sff)
+header(sff)
+@
+%%
+
+
+\noindent Plot histogram of read lengths:
+<<ReadLengths,fig=TRUE>>=
+hist(sff, xlab="Read Lengths", 
+     main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
+     breaks=100)
+@
+%%
+
+
+\noindent Setting the \Robject{clipMode} will change the read lengths that are reported by \Rfunction{width} and plotted by \Rfunction{hist}. 
+Currently the following modes are supported:
+\begin{itemize}
+  \item \Robject{adapter} : defined in the SFF file, and meant to remove adapter sequence
+  \item \Robject{quality} : defined in the SFF file, and meant to remove low-quality regions of the sequence
+  \item \Robject{full} : uses the "interior" of quality and adapter and is the most conservative
+  \item \Robject{raw} : no clipping is applied and full length reads are returned
+  \item \Robject{custom} : clip points set by the user as an \Rclass{IRanges} object.
+\end{itemize}
+
+<<clipmode, fig=TRUE>>=
+availableClipModes()
+clipMode(sff)
+clipMode(sff) <- "raw"
+hist(sff, xlab="Read Lengths", 
+     main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
+     breaks=100)
+@
+%%
+
+Finally, custom clip points can be set using \Rclass{IRanges}. 
+For example, it is sometimes useful to look for barcodes (MID tags) in a set of reads.
+
+<<IR>>=
+customClip(sff) <- IRanges(start = 1, end = 15)
+clipMode(sff) <- "custom"
+t = table(counts=as.character(sread(sff)))
+@
+%%
+
+
+%%
+<<texTable,results=tex,echo=FALSE>>=
+xtable(as.table(table(counts=as.character(sread(sff)))[table(as.character(sread(sff)))>2]))
+@
+%%
+
+
 
 \section{Exploring \rSFFreader{} objects}
 Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{SffReadsQ} is derived from \Rclass{SffReads} and is very similar with the addition of functionality for storing quality information.
 
 
 The \Rclass{SffReadsQ} has the following slots:
-
-
-\Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
-
-
-\Robject{sread} of class \Rclass{DNAStringSet}
-
-
-\Robject{qualityIR} of class \Rclass{IRanges}
-
-
-\Robject{adapterIR} of class \Rclass{IRanges}
-
-
-\Robject{customIR} of class \Rclass{IRanges}
-
-
-\Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
-
-
-\Robject{header} of class \Rclass{list} which contains details about the SFF header.
+\begin{itemize}
+  \item \Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
+  \item \Robject{sread} of class \Rclass{DNAStringSet}
+  \item \Robject{qualityIR} of class \Rclass{IRanges}
+  \item \Robject{adapterIR} of class \Rclass{IRanges}
+  \item \Robject{customIR} of class \Rclass{IRanges}
+  \item \Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
+  \item \Robject{header} of class \Rclass{list} which contains details about the SFF header.
+\end{itemize}
 
 
 
