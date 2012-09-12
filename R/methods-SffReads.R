@@ -295,3 +295,15 @@ setMethod(detail, "SffReads", function(x, ...) {
     show(qualityClip(x))
     show(adapterClip(x))
 })
+
+###hist
+if( is.null(getGeneric("hist")) )
+  setGeneric("hist")
+
+# setMethod("hist",signature(x="SffReads"),
+#           function(x,...) plotDensity.AffyBatch(x,...))
+
+setMethod(hist, signature(x="SffReads"), 
+  function(x, ...){
+  hist(width(x), ...)
+})
