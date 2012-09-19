@@ -30,18 +30,18 @@ availableClipModes <- function(x) c("full","adapter","quality","raw","custom")
          "raw"=solveUserSEW(width(object@sread)))
 }
 
-
+#### fix id, does not exist
 setMethod(writePhredQual, "FastqQuality", function(object, filepath, mode="w", ...) {
   if (length(filepath) != 1)
     sprintf("UserArgumentMismatch:'%s' must be '%s'",
             "file", "character(1)")
-  filepatt <- path.expand(filepath)
+  filepath <- path.expand(filepath)
   if (file.exists(filepath) && mode != "a")
     sprintf("UserArgumentMismatch:file '%s' exists, but mode is not 'a'",
             filepath)
   ## FIXME: different quality types
   max_width <- max( unique(width(quality(object))))
-  .Call("write_phred_quality", id(object), 
+  .Call("write_phred_quality", names(object), 
         quality(object), file, mode, max_width)
   invisible(length(object))
 })
