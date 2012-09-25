@@ -20,6 +20,12 @@
     \alias{writeFasta, SffReads-method}
     \alias{hist, SffReads-method}
 
+
+    #####
+      Sam: 
+      I got rid of the spaces in all of these. I'm not sure what to do with the other comments.
+    #####
+
   I think you don't get a warning for those because you are not exporting
   those methods. The fact that they work despite not being exported is because
   of some glitch with how NAMESPACEs are currently implemented but I would
@@ -40,6 +46,11 @@
 
 4. 3 man pages lack examples (even a trivial one): SffHeader-class.Rd,
   load454SampleData.Rd, and loadIonSampleData.Rd.
+
+    ##########
+      Sam:
+        Added examples for both load454SampleData and loadIonSampleData. Both examples are moderately in-depth.
+    #########
 
 5. The standard sentence that we see in a lot of man pages:
 

@@ -24,14 +24,14 @@
 \alias{qualityClip,SffReads-method}
 \alias{qualityClip<-,SffReads-method}
 \alias{rawClip,SffReads-method}
-\alias{sread, ANY-method}
+\alias{sread,ANY-method}
 \alias{sread}
-\alias{id, SffReads-method}
-\alias{name, SffReads-method}
-\alias{append, SffReads-method}
-\alias{width, SffReads-method}
-\alias{writeFasta, SffReads-method}
-\alias{hist, SffReads-method}
+\alias{id,SffReads-method}
+\alias{name,SffReads-method}
+\alias{append,SffReads-method}
+\alias{width,SffReads-method}
+\alias{writeFasta,SffReads-method}
+\alias{hist,SffReads-method}
 \alias{solveSffSEW}
 \alias{adapterClip}
 \alias{adapterClip<-}
