@@ -4,7 +4,20 @@ import(methods)
 import(Biostrings)
 import(IRanges)
 
-exportClassPattern("^[^\\.]")
 
-exportPattern("^[^\\.]")
+exportClasses(
+  SffHeader, SffReads, SffReadsQ
+)
 
+exportMethods(
+  show, detail, header, names, "names<-", id, length, width, 
+  adapterClip, qualityClip, customClip, rawClip, fullClip, clipMode,
+  "adapterClip<-", "qualityClip<-", "customClip<-", "clipMode<-",
+  "[", append, writeFasta, writeFastq, writePhredQual, writeFastaQual
+)
+
+export(
+  availableClipModes, solveSffSEW, writePhredQual, SffReads, sread, quality,
+  load454SampleData, loadIonSampleData,
+  readSff, readSffGeometry, readSffHeader, SffReadsQ
+)

@@ -15,7 +15,7 @@ load454SampleData()
 None
 }
 
-\value{Loads a small example Roche 454 dataset(sff file) into a \code{\linkS4class{SffReadsQ}} object containing 1000 reads.}
+\value{Loads a small example Roche 454 dataset (sff file) into a \code{\linkS4class{SffReadsQ}} object containing 1000 reads.}
 
 \author{Matt Settles <msettles@uidaho.edu>}
 

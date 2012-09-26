@@ -1,43 +1,48 @@
 
 ## Inspector
-setMethod(.sffValidity, "SffReads", function(object) {
-#	cat("## SFFreads Validity ###\n")
-    msg <- NULL
-    lens <- length(object@sread)
-    lenqc <- length(object@qualityIR)
-    lenac <- length(object@adapterIR)
-    if (length(unique(c(lens,lenqc,lenac))) != 1) {
-        txt <- sprintf("mismatch length in sread, qualityClip, or adapterClip: %d %d %d",
-                       lens,lenqc,lenac)
-        msg <- c(msg, txt)
-    }
-    
-##TODO: need to add check for IRanges out of bounds
-	if (!(object@clipMode %in% availableClipModes())){
-		txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=" ")))
-		msg <- c(msg,txt)
-	}
-    if (is.null(msg)) TRUE else msg
+setMethod(.sffValidity,
+          signature=c("SffReads"),
+          function(object) {
+            #	cat("## SFFreads Validity ###\n")
+            msg <- NULL
+            lens <- length(object@sread)
+            lenqc <- length(object@qualityIR)
+            lenac <- length(object@adapterIR)
+            if (length(unique(c(lens,lenqc,lenac))) != 1) {
+              txt <- sprintf("mismatch length in sread, qualityClip, or adapterClip: %d %d %d",lens,lenqc,lenac)
+              msg <- c(msg, txt)
+            }
+            ##TODO: need to add check for IRanges out of bounds
+            if (!(object@clipMode %in% availableClipModes())){
+              txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=" ")))
+              msg <- c(msg,txt)
+            }
+            if (is.null(msg)) TRUE else msg
 })
 
 ## constructor, missing customIR for now
-"SffReads" <- function(sread, qualityIR, adapterIR,
-	clipMode=availableClipModes(), header, ...)
-{
-    if (missing(header)) header = list()
-    clipMode = match.arg(clipMode)
-    if (missing(qualityIR) | missing(adapterIR))
-        emptyIR <- IRanges(start=rep(1,length(sread)),width=width(sread))
-    if (missing(qualityIR)) qualityIR=emptyIR
-    if (missing(adapterIR)) adapterIR=emptyIR
-    
-    new("SffReads", header=header, sread=sread,
-        qualityIR=.solveIRangeSEW(width(sread),qualityIR),adapterIR= .solveIRangeSEW(width(sread), adapterIR), clipMode=clipMode, ...)    
+"SffReads" <- 
+  function(sread, qualityIR, adapterIR, clipMode=availableClipModes(), header, ...){
+  if (missing(header)) header = list()
+  clipMode = match.arg(clipMode)
+
+  if (missing(qualityIR) | missing(adapterIR))
+    emptyIR <- IRanges(start=rep(1,length(sread)),width=width(sread))
+
+  if (missing(qualityIR)) qualityIR=emptyIR
+
+  if (missing(adapterIR)) adapterIR=emptyIR
+  
+  new("SffReads", header=header, sread=sread,
+      qualityIR=.solveIRangeSEW(width(sread), qualityIR),
+      adapterIR=.solveIRangeSEW(width(sread), adapterIR), 
+      clipMode=clipMode, ...)    
 }
 
 ### Accessor functions
 
-"sread" <- function(object, start=NULL,end=NULL,width=NULL,clipmode,...){
+"sread" <- 
+  function(object, start=NULL,end=NULL,width=NULL,clipmode,...){
 	if (inherits(object,"SffReads")){
     IR <- solveSffSEW(object,start,end,width,clipmode,...)
     subseq(object@sread,start=start(IR),end=end(IR))
@@ -55,14 +60,19 @@ setMethod(.sffValidity, "SffReads", function(object) {
 #                   })
 
 ### Print out Read Names
-setMethod(names, "SffReads", function(x) names(x@sread))
+setMethod(names, 
+          signature="SffReads", 
+          function(x) names(x@sread))
 
 ### Reassign Read Names
-setReplaceMethod( f="names",signature="SffReads",
-    definition=function(x,value){names(x@sread) <- value; return(x)})
+setReplaceMethod( f="names",
+                  signature="SffReads",
+                  function(x,value){names(x@sread) <- value; return(x)})
 
 ### Print out Read Names as BString Set (ShortRead way)
-setMethod(id, "SffReads", function(object) BStringSet(names(object@sread)))
+setMethod(id,
+          signature="SffReads",
+          function(object) BStringSet(names(object@sread)))
 
 ### number of sequences
 setMethod(length, "SffReads", function(x) length(x@sread))
@@ -294,16 +304,4 @@ setMethod(detail, "SffReads", function(x, ...) {
     cat("\nclip points:\n")
     show(qualityClip(x))
     show(adapterClip(x))
-})
-
-###hist
-if( is.null(getGeneric("hist")) )
-  setGeneric("hist")
-
-# setMethod("hist",signature(x="SffReads"),
-#           function(x,...) plotDensity.AffyBatch(x,...))
-
-setMethod(hist, signature(x="SffReads"), 
-  function(x, ...){
-  hist(width(x), ...)
 })

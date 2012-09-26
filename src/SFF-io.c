@@ -398,11 +398,14 @@ read_sff_header(SEXP files, SEXP verbose)
 int
 count_reads_sum(SEXP files)
 {
+    COMMONheader header;
     int i, nfile = LENGTH(files);
     int nreads = 0;
 
     for(i=0; i<nfile; i++) {
-        nreads += readCommonHeader(CHAR(STRING_ELT(files,i))).number_of_reads;
+        header = readCommonHeader(CHAR(STRING_ELT(files,i)));
+        nreads += header.number_of_reads;
+        freeCommonHeader(header);
     }
     return nreads;
 }
@@ -599,7 +602,7 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
     char ch;
     uint16_t uint16;
     uint8_t uint8;
-    uint8_t *byte_padding = (uint8_t*) malloc(sizeof(uint8_t)*(8)); // worst case
+//    static uint8_t byte_padding[8];
 
     const char *string2 = CHAR(string);
 

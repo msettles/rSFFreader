@@ -13,4 +13,267 @@ NEW FEATURES
     o All features are new
 
 BUG FIXES
+Comments by Herve, during the Bioconductor Check
 
+1. 'R CMD check' produces the following warning:
+
+    * checking for missing documentation entries ... WARNING
+    Undocumented S4 methods:
+      generic 'hist' and siglist 'SffReads'
+
+  I think this is because of the space after the comma in this alias (in
+  SffReads-class.Rd):
+
+    \alias{hist, SffReads-method}
+
+  Note that you have other aliases with an extra space that would need to
+  be removed:
+
+    \alias{sread, ANY-method}
+    \alias{id, SffReads-method}
+    \alias{name, SffReads-method}
+    \alias{append, SffReads-method}
+    \alias{width, SffReads-method}
+    \alias{writeFasta, SffReads-method}
+    \alias{hist, SffReads-method}
+
+
+#####
+MS: I got rid of the spaces in all of these. I'm not sure what to do with the other comments.
+#####
+
+  I think you don't get a warning for those because you are not exporting
+  those methods. The fact that they work despite not being exported is because
+  of some glitch with how NAMESPACEs are currently implemented but I would
+  argue that you should explicitely export all the methods you define in
+  your package. Also note that sread() is a regular function so the above
+  alias doesn't make sense.
+
+2. Because you define a "hist" method and the hist() function belongs to the
+  graphics package you need to Imports graphics and the import hist from
+  graphics in your NAMESPACE. But do you really need to define such a method,
+  just to have the user type 'hist(sff)' instead of 'hist(width(sff))'?
+
+############
+MS: Agreed, removed the hist function from rSFFreader
+############
+
+3. Your sread() function is masking the sread() function defined in the
+  ShortRead package. This should be avoided as loading rSFFreader will break
+  ShortRead::sread(). I encourage you to talk with Martin for the best way to
+  deal with this (e.g. maybe ShortRead::sread() should be made generic so
+  you could define a method for SffReads objects).
+
+###########
+MS: Defining sread as a generica would be ideal, but I assume Martin had a reason not
+to do so and I'd be happy to talk to him about that.
+However, masking the sread does not actually break the ShortRead::sread() while the
+ShortRead function is not called functionally my function will return the same result.
+###########
+
+4. 3 man pages lack examples (even a trivial one): SffHeader-class.Rd,
+  load454SampleData.Rd, and loadIonSampleData.Rd.
+
+##########
+MS: Added examples for SffHeader-class.Rd, load454SampleData and loadIonSampleData. Both examples are moderately in-depth.
+#########
+
+5. The standard sentence that we see in a lot of man pages:
+
+     Objects can be created by calls of the form ‘new("SffHeader",
+     ...)’.
+
+  is confusing the user because, most of the time, this is not how the
+  user should create SffHeader objects. Please remove in all man pages and
+  focus the documentation on how the user will really create those objects
+  (e.g. with a constructor or a read* function).
+
+#########
+MS: Had the text on how "users will really create those object" already in there and
+went ahead and removed any reference to using "new".
+#########
+
+6. In SffHeader-class.Rd please explain a little bit more the structure of
+  the object returned by header(). Not just a list but a list of list. What
+  are the top-level elements of the outter list? What are the element of the
+  inner list? Are the list named? Etc... It would help to clarify if you could
+  illustrate with an example involving more that 1 file passed to
+  readsffheader().
+
+7. Many methods for SffReads objects are under-documented in the man pages:
+  adapterClip, adapterClip<-, clipMode, clipMode<-, customClip, customClip<-,
+  fullClip, qualityClip, qualityClip<-, rawClip, id, writeFasta.
+  Also the availableClipModes, method is not documented at all (there is an
+  alias for it but the method is not mentioned at all in the man page).
+  All those methods would need to be illustrated with at least 1 example
+  (some of them are introduced in the vignette though but they need to be
+  fully documented in the man pages).
+
+8. SffReads() is documented as if it was a generic with methods when it's
+  actually implemented as a regular function. Also the man page should make
+  it clear that this is a constructor, and put it in a dedicated section
+  (Constructor section) instead of putting it in the Methods section where
+  methods that operate on an SffReads object are described. Some examples
+  of how to use this constructor would need to be provided.
+
+##########
+MS: Fixed the documentation, moved to a contstructor section
+##########
+
+9. Some man pages (e.g. SffReads-class.Rd) and .R files (e.g. methods-Misc.R)
+  use IRange instead of IRanges.
+
+#########
+MS: Fixed
+#########
+10. Function naming: why not readSff (or readSFF), readSffGeometry (or
+  readSFFgeometry) and readSffheader (or readSFFheader) instead of readsff,
+  readsffgeometry and readsffheader?
+
+#########
+MS: Why not? Sure, I changed them
+#########
+11. Why have readsffgeometry() return a 2-elt list with the 1st elt (nReads)
+  being the length of the 2nd (Read_Widths)? This is redundant and you could
+  just return a single integer vector containing the read widths. Also in
+  the \example section of the man page you have this line:
+
+    sffstats <- readsffgeometry(...)
+
+  Why not use more consistent naming e.g.
+
+    sffgeom <- readsffgeometry(...)
+
+  or if readsffgeometry() is really to be considered a function returning
+  stats then it could be renamed:
+
+    sffstats <- readsffstats(...)
+
+################
+MS: The read SFF geometry function is a direct return from C where it was simpler to have it be two element,
+number of reads to iterate over and the read lengths in C. I return the result to R, in case someone wishes
+to know the geometry of the file, however I expect this function is rarely expected to be used. I see no major
+reason not to be a little redundant here, since a fix would be to return only the second element. Will change if I must.
+
+MS: Fixed the Rd file, to be sffgeom
+#################
+
+
+################
+
+12. C code:
+
+  - Register .Call entry points.
+
+####
+MS: I did, in the R_init_rSFFreader.c, didn't I?
+####
+
+  - Why use malloc here since the array has a fixed size:
+
+      uint8_t *byte_padding = (uint8_t*) malloc(sizeof(uint8_t)*(8));
+
+    This leads to a memory leak (even small) because the memory is allocated
+    each time readSFF() is called but is never freed.
+
+    The standard way to allocate this array is to do:
+
+      uint8_t byte_padding[8];
+
+    or:
+
+      static uint8_t byte_padding[8];
+
+    With 'static', the array is allocated once for all at load time and reused
+    each time readSFF() is called so it's like a global variable but its scope
+    is limited to the body of readSFF(). It's also automatically initialized
+    with zeroes.
+    Without 'static', a new array is allocated each time readSFF() is called
+    and freed when readSFF() returns. It's not initialized so each time it
+    contains random garbbage.
+
+########
+MS: Turns out this is probably legacy code and the variable no longer used, removed it.
+########
+  - A more serious memory leak is in count_reads_sum():
+
+      for(i=0; i<nfile; i++) {
+        nreads += readCommonHeader(CHAR(STRING_ELT(files,i))).number_of_reads;
+      }
+
+    freeCommonHeader() would need to be called after each call to
+    readCommonHeader().
+
+##########
+MS: Fixed and thank you
+##########
+13. In the vignette:
+
+  - The first chunk of code is placed before the table of content. Should be
+    after (in Introduction or maybe at the beginning of the "A simple
+    workflow" section).
+
+#########
+MS: done
+#########
+
+  - Try to be more consistent in your choice of variable names e.g. the same
+    example in the vignette and in the man page use a different variable
+    name. In the vignette:
+
+      sff <- readsff(...)
+
+    In the man page:
+
+      reads <- readsff(...)
+
+#########
+MS: Fixed all I could find, changed all to sff
+#########
+  - The vignette is incomplete:
+
+      - Section "A simple workow" feels minimalist as it only shows how to
+        load an SFF file and plot an histogram of the read lengths.
+
+      - Section "Exploring rSFFreader objects" is almost empty.
+
+Things that can be addressed later:
+
+14. For the sake of keeping the S4 hierarchy as simple/clean as possible, I
+  would suggest you get rid of the .SffBase class (virtual class with no
+  slots). You absolutely don't need it (at least at the moment but I don't
+  know what the lon term plans are). The "show" and "detail" methods for
+  .SffBase objects could just be made methods for SffHeader objects.
+
+##########
+MS: I followed Martin Example from ShortRead, the virtual class has been removed
+##########
+
+
+15. Finally it feels that, in order to be really useful, the package would
+  need to support the kind of nice things that the ShortRead package does
+  on ShortRead objects like for example tools to generate quality assessment
+  reports. Maybe the easiest path for that would be to provide coercion
+  methods from SffReads to ShortRead and from SffReadsQ to ShortReadQ. I'm
+  not familiar enough with the topic though so I'm not in a position to say
+  that this is the right approach. I would encourage you to discuss and
+  coordinate with Martin Morgan. My feeling is that the rSFFreader package
+  could benefit from reusing some of the existing functionalities implemented
+  in the ShortRead package. If, for whatever reason, coercion from rSFFreader
+  objects to ShortRead objects is not an option, maybe the SffReads class
+  could extend the ShortRead class.
+
+
+###########
+MS: I don't disagree with you Herve, right now the only additional capablility
+beyond ShortRead is reading in via C directly from SFF files for Roche and Ion Torrent
+and the clipping scheme, aka view on reads. Which BTW I use alot. We are close to finishing
+additional code C with functions and analysis dealing with the flowgrams (data prior to 
+sequence and quality calls), this element distinguishes the package from ShortRead and 
+makes it publication worthy.
+###########
+
+Thanks and let me or Martin know (or ask on the Bioc-devel mailing list) if
+you have any question or need help with this.
+
+H.

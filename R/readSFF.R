@@ -1,10 +1,10 @@
 
 ### Sample Data
 load454SampleData <- function() {
-  readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+  readSff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
 }
 loadIonSampleData <- function() {
-  readsff(system.file("extdata","SmallTorrentTest.sff",package="rSFFreader"))
+  readSff(system.file("extdata","SmallTorrentTest.sff",package="rSFFreader"))
 }
 
 #lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
@@ -23,7 +23,7 @@ loadIonSampleData <- function() {
 ## functions 
 ## returns the contents of the SFF file into either a SffReads or SffReadsQ class, which acts and behaves similar to
 ## the ShortRead and ShortReadQ classes from package ShortRead
-readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("full","adapter","quality","raw"), verbose=TRUE){
+readSff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("full","adapter","quality","raw"), verbose=TRUE){
   if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
   stopifnot(file.exists(filenames))
   clipMode <- match.arg(clipMode)
@@ -46,7 +46,7 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("fu
 }
 
 ## Returns a list of size 2
-readsffgeometry <- function(filenames) {
+readSffGeometry <- function(filenames) {
 	stopifnot(file.exists(filenames))
  	sffgeometry <- .Call("sff_geometry", filenames,"rSFFreader")
     names(sffgeometry) <- c("nReads","Read_Widths")
@@ -54,7 +54,7 @@ readsffgeometry <- function(filenames) {
 }
 
 
-readsffheader <- function(filenames,verbose=TRUE) {
+readSffHeader <- function(filenames,verbose=TRUE) {
     stopifnot(file.exists(filenames))
     if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")

@@ -1,14 +1,14 @@
-\name{readsffgeometry}
-\alias{readsffgeometry}
+\name{readSffGeometry}
+\alias{readSffGeometry}
 
 \title{Read in basic statistics about an sff file}
 
 \description{
-  \code{readsffgeometry} processes a sff file or set of sff files, counting the number of reads and the length of each read.
+  \code{readSffGeometry} processes a sff file or set of sff files, counting the number of reads and the length of each read.
 }
 
 \usage{
-readsffgeometry(filenames)
+readSffGeometry(filenames)
 }
 
 
@@ -21,7 +21,7 @@ readsffgeometry(filenames)
 \author{Matt Settles <msettles@uidaho.edu>}
 
 \examples{
-sffstats <- readsffgeometry(system.file("extdata","Small454Test.sff",package="rSFFreader"))
-sffstats$nReads
-sffstats$Read_Widths
+sffgeom <- readSffGeometry(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+sffgeom$nReads
+sffgeom$Read_Widths
 }

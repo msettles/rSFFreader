@@ -1,16 +1,16 @@
-\name{readsff}
-\alias{readsff}
+\name{readSff}
+\alias{readSff}
 
 \title{Read SFF-formatted files into SffReads or SffReadsQ objects}
 
 \description{
-  \code{readsff} reads all sff files specified in \code{filenames}, returning an R object of type \code{\linkS4class{SffReads}} or 
+  \code{readSff} reads all sff files specified in \code{filenames}, returning an R object of type \code{\linkS4class{SffReads}} or 
   \code{\linkS4class{SffReadsQ}} which acts and behaves similarly to the \code{\linkS4class{ShortRead}} and \code{\linkS4class{ShortReadQ}} 
   classes from package ShortRead
 }
 
 \usage{
-readsff(filenames, use.qualities=TRUE, use.names=TRUE, clipMode = c("full", "adapter", "quality", "raw"), verbose=TRUE)
+readSff(filenames, use.qualities=TRUE, use.names=TRUE, clipMode = c("full", "adapter", "quality", "raw"), verbose=TRUE)
 }
 
 
@@ -33,5 +33,5 @@ readsff(filenames, use.qualities=TRUE, use.names=TRUE, clipMode = c("full", "ada
 \author{Matt Settles <msettles@uidaho.edu>}
 
 \examples{
-reads <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+sff <- readSff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
 }

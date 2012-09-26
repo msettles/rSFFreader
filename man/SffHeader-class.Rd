@@ -7,6 +7,9 @@
 \alias{SffHeader-class}
 \alias{SffHeader}
 
+\alias{show,SffHeader-method}
+\alias{detail,SffHeader-method}
+
 %Methods
 \alias{header,SffHeader-method}
 \alias{header}
@@ -14,12 +17,11 @@
 \title{Class \code{"SffHeader"} contains top header information from the SFF files read in.}
 
 \description{
-Objects can be created by calls of the form \code{new("SffHeader", ...)}.
 This class contains a list-like structure with header descriptions
 derived from one or more SFF files.
 
-Objects from this class are the result of \code{\link{readsffheader}},
-or from the result of \code{\link{readsff}}.
+Objects from this class are the result of \code{\link{readSffHeader}},
+or from the result of \code{\link{readSff}}.
 
 }
 
@@ -30,9 +32,7 @@ or from the result of \code{\link{readsff}}.
       of the SFF files.}
   }
 }
-\section{Extends}{
-Class \code{"\linkS4class{.SFFBase}"}, directly.
-}
+
 \section{Methods}{
   \describe{
     \item{header}{\code{signature(object = "SffHeader")}: access the 
@@ -46,5 +46,7 @@ Class \code{"\linkS4class{.SFFBase}"}, directly.
 }
 \examples{
 showClass("SffHeader")
+header <- readSffHeader(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+header
 }
 \keyword{classes}

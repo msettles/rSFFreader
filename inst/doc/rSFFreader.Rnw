@@ -33,6 +33,9 @@
 
 \maketitle
 
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% set up the R environment
 <<options,echo=FALSE>>=
 options(width=60)
 @
@@ -41,8 +44,6 @@ options(width=60)
 library("rSFFreader")
 library("xtable")
 @
-
-\tableofcontents
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 The SFF file format has been adopted by both Roche 454 and Ion Torrent next generation sequencing platforms. \Rpackage{rSFFreader} provides 
@@ -55,7 +56,7 @@ Read in an SFF file:
 @
 %
 <<Reads454>>=
-sff <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+sff <- readSff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
 @
 %%
 
@@ -70,7 +71,7 @@ header(sff)
 
 \noindent Plot histogram of read lengths:
 <<ReadLengths,fig=TRUE>>=
-hist(sff, xlab="Read Lengths", 
+hist(width(sff), xlab="Read Lengths", 
      main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
      breaks=100)
 @
@@ -91,7 +92,7 @@ Currently the following modes are supported:
 availableClipModes()
 clipMode(sff)
 clipMode(sff) <- "raw"
-hist(sff, xlab="Read Lengths", 
+hist(width(sff), xlab="Read Lengths", 
      main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
      breaks=100)
 @

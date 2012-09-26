@@ -1,14 +1,14 @@
-\name{readsffheader}
-\alias{readsffheader}
+\name{readSffHeader}
+\alias{readSffHeader}
 
 \title{Read in sff header}
 
 \description{
-  \code{readsffheader} Processes an sff file or set of sff files, and store the header information in a \code{\linkS4class{SffHeader}} object.
+  \code{readSffHeader} Processes an sff file or set of sff files, and store the header information in a \code{\linkS4class{SffHeader}} object.
 }
 
 \usage{
-readsffheader(filenames, verbose=TRUE)
+readSffHeader(filenames, verbose=TRUE)
 }
 
 
@@ -25,6 +25,6 @@ readsffheader(filenames, verbose=TRUE)
 \author{Matt Settles <msettles@uidaho.edu>}
 
 \examples{
-sffhead <- readsffheader(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+sffhead <- readSffHeader(system.file("extdata","Small454Test.sff",package="rSFFreader"))
 sffhead@header
 }

@@ -1,13 +1,8 @@
-
 .sffValidity <- function(object) TRUE
-
 setGeneric(".sffValidity")
 
-## Virtual base classes
-
-setClass(".SffBase")
-
-setClass("SffHeader", contains=".SffBase",
+## Classes
+setClass("SffHeader", contains=c(),
          representation=representation(
            header="list"),
          prototype=prototype(

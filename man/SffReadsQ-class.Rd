@@ -8,6 +8,7 @@
 \alias{SffReadsQ}
 
 %Methods
+\alias{detail,SffReadsQ-method}
 \alias{[,SffReadsQ,ANY,ANY-method}
 \alias{[,SffReadsQ,ANY,missing-method}
 \alias{[,SffReadsQ,missing,ANY-method}
@@ -15,7 +16,7 @@
 \alias{writeFastaQual,SffReadsQ-method}
 \alias{writePhredQual,SffReadsQ-method}
 \alias{writePhredQual,FastqQuality-method}
-\alias{writeFastq,SffReadsQ-method}
+\alias{writeFastq,SffReadsQ,ANY-method}
 \alias{quality,ANY-method}
 \alias{append,SffReadsQ,SffReadsQ,missing-method}
 \alias{quality}
@@ -34,9 +35,10 @@ SFF files (Roche 454 and Life Sciences Ion Torrent) and their quality scores}
   in a coordinated fashion, next generation reads stored in SFF files, 
   their identifiers and quality scores.
 
-  Objects from this class are the result of \code{\link{readsff}}, or
+  Objects from this class are the result of \code{\link{readSff}}, or
   can be constructed from \code{DNAStringSet}, \code{QualityScore}, and
-  \code{BStringSet} objects, as described below.
+  \code{BStringSet} objects, using a call to the
+  constructor \code{SffReadsQ}, as described below.
 }
 
 \section{Slots}{
@@ -54,28 +56,31 @@ SFF files (Roche 454 and Life Sciences Ion Torrent) and their quality scores}
 \section{Extends}{
 Class \code{"\linkS4class{SffReads}"}, directly.
 Class \code{"\linkS4class{SffHeader}"}, by class "SffReads", distance 2.
-Class \code{"\linkS4class{.SFFBase}"}, by class "SffReads", distance 3.
 }
-\section{Methods}{
+\section{Constructors}{
   \describe{
-    \item{SffReadsQ}{\code{signature(sread = "DNAStringSet", quality = "QualityScore", id = "BStringSet")}:}
-    \item{SffReadsQ}{\code{signature(sread = "DNAStringSet", quality = "BStringSet", id = "BStringSet")}:
+      \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "QualityScore", id = "BStringSet"}:}
+    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "BStringSet", id = "BStringSet"}:
         Create a \code{SffReadsQ} object from reads, their quality
       scores, and identifiers. When \code{quality} is of class
       \code{BStringSet}, the type of encoded quality score is inferred
       from the letters used in the scores. The length of \code{id} and
       \code{quality} must match that of \code{sread}.}
 
-    \item{SffReadsQ}{\code{signature(sread = "DNAStringSet", quality = "QualityScore", id = "missing")}:}
-    \item{SffReadsQ}{\code{signature(sread = "DNAStringSet", quality = "BStringSet", id = "missing")}:
+    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "QualityScore", id = "missing"}:}
+    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "BStringSet", id = "missing"}:
 
       Create a \code{SffReadsQ} object from reads and their quality
       scores, creating empty identifiers. When \code{quality} is of
       class \code{BStringSet}, the type of encoded quality score is
       inferred from the letters used in the scores. }
 
-    \item{SffReadsQ}{\code{signature(sread = "missing", quality = "missing", id = "missing", ...)}:
+    \item{SffReadsQ}{\code{sread = "missing", quality = "missing", id = "missing", ...}:
       Create an empty \code{SffReadsQ} object.}
+  }
+}
+\section{Methods}{
+  \describe{
     \item{quality}{inherited from \code{signature(object = "ANY")}:
       access the quality slot of \code{object}.}
     \item{[}{\code{signature(x = "SffReads", i = "ANY", j = "missing")}:
@@ -110,7 +115,7 @@ Class \code{"\linkS4class{.SFFBase}"}, by class "SffReads", distance 3.
 
 \seealso{
 
-  \code{\link{readsff}} for creation of objects of this class from
+  \code{\link{readSff}} for creation of objects of this class from
   SFF files.
 
 }
@@ -121,8 +126,8 @@ showMethods(class="SffReadsQ", where=getNamespace("rSFFreader"),
 showMethods(class="SffReads", where=getNamespace("rSFFreader"),
             inherit=FALSE)
 
-reads <- readsff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
-quality(reads)
+sff <- readSff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+quality(sff)
 
 }
 \keyword{classes}
