@@ -24,7 +24,7 @@
 \alias{qualityClip,SffReads-method}
 \alias{qualityClip<-,SffReads-method}
 \alias{rawClip,SffReads-method}
-\alias{sread,ANY-method}
+%\alias{sread,ANY-method}
 \alias{sread}
 \alias{id,SffReads-method}
 \alias{name,SffReads-method}
@@ -33,18 +33,18 @@
 \alias{writeFasta,SffReads-method}
 \alias{hist,SffReads-method}
 \alias{solveSffSEW}
-\alias{adapterClip}
-\alias{adapterClip<-}
+%\alias{adapterClip}
+%\alias{adapterClip<-}
 \alias{availableClipModes}
-\alias{clipMode}
-\alias{clipMode<-}
-\alias{customClip}
-\alias{customClip<-}
-\alias{fullClip}
-\alias{qualityClip}
-\alias{qualityClip<-}
-\alias{rawClip}
-\alias{hist}
+%\alias{clipMode}
+%\alias{clipMode<-}
+%\alias{customClip}
+%\alias{customClip<-}
+%\alias{fullClip}
+%\alias{qualityClip}
+%\alias{qualityClip<-}
+%\alias{rawClip}
+%\alias{hist}
 
 
 

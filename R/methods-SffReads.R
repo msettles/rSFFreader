@@ -72,7 +72,7 @@ setMethod(width, "SffReads", function(x) width(solveSffSEW(x)))
 
 ##### Clipping Points
 ### IRange object of adapterClip points
-setMethod(adapterClip, "SffReads", function(object) .solveIRangeSEW(width(object@sread),object@adapterIR))
+setMethod(adapterClip, signature="SffReads", definition=function(object) .solveIRangeSEW(width(object@sread),object@adapterIR))
 
 ### Reassign adapterClip points
 setReplaceMethod( f="adapterClip",signature="SffReads", 
