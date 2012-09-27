@@ -242,7 +242,18 @@ MS: Fixed all I could find, changed all to sff
       - Section "A simple workow" feels minimalist as it only shows how to
         load an SFF file and plot an histogram of the read lengths.
 
+####
+Added some QA code to fill out the "simple workflow" a bit.
+####
+
+
       - Section "Exploring rSFFreader objects" is almost empty.
+
+####
+Added some additional details to this section. But more could probably be added.
+####
+
+
 
 Things that can be addressed later:
 
