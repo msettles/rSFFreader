@@ -130,7 +130,7 @@ SH:
   id
   writeFasta
   availableClipModes  : added a new help file with an extensive set of examples showing how clipping works.
-
+##############
 
 8. SffReads() is documented as if it was a generic with methods when it's
   actually implemented as a regular function. Also the man page should make
