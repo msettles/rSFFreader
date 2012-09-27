@@ -147,7 +147,7 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
 
 \author{Matt Settles with lots of code 'borrowed' from Martin Morgan's ShortRead Package}
 \seealso{
-  \code{\linkS4class{SffReadsQ}}
+  \code{\linkS4class{SffReadsQ} and \link{availableClipModes}}
 }
 \examples{
 showClass("SffReads")
