@@ -242,7 +242,18 @@ MS: Fixed all I could find, changed all to sff
       - Section "A simple workow" feels minimalist as it only shows how to
         load an SFF file and plot an histogram of the read lengths.
 
+####
+SH: Added some QA code to fill out the "simple workflow" a bit.
+####
+
+
       - Section "Exploring rSFFreader objects" is almost empty.
+
+####
+SH: Added some additional details to this section. But more will be added in the next release.
+####
+
+
 
 Things that can be addressed later:
 
@@ -278,6 +289,8 @@ and the clipping scheme, aka view on reads. Which BTW I use alot. We are close t
 additional code C with functions and analysis dealing with the flowgrams (data prior to 
 sequence and quality calls), this element distinguishes the package from ShortRead and 
 makes it publication worthy.
+
+MS: Herve, much more documentation will be added in the coming months.
 ###########
 
 Thanks and let me or Martin know (or ask on the Bioc-devel mailing list) if

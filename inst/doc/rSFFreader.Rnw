@@ -98,8 +98,8 @@ hist(width(sff), xlab="Read Lengths",
 @
 %%
 
-Finally, custom clip points can be set using \Rclass{IRanges}. 
-For example, it is sometimes useful to look for barcodes (MID tags) in a set of reads.
+Custom clip points can be set using \Rclass{IRanges}. 
+For example, it is sometimes useful to look for barcodes (MID tags) in the first 15 bases of a set of reads.
 
 <<IR>>=
 customClip(sff) <- IRanges(start = 1, end = 15)
@@ -115,6 +115,43 @@ xtable(as.table(table(counts=as.character(sread(sff)))[table(as.character(sread(
 @
 %%
 
+Finally, we can generate some useful QA plots and 
+
+<<qa, fig=TRUE>>=
+## Generate some QA plots:
+## Read length histograms:
+par(mfrow=c(2,2))
+clipMode(sff) <- "raw"
+hist(width(sff),breaks=500,col="grey",xlab="Read Length",main="Raw Read Length")
+
+clipMode(sff) <- "full"
+hist(width(sff),breaks=500,col="grey",xlab="Read Length",main="Clipped Read Length")
+
+## Base by position plots:
+clipMode(sff) <- "raw"
+ac <- alphabetByCycle(sread(sff),alphabet=c("A","C","T","G","N"))
+ac.reads <- apply(ac,2,sum)
+acf <- sweep(ac,MARGIN=2,FUN="/",STATS=apply(ac,2,sum))
+
+matplot(cbind(t(acf),ac.reads/ac.reads[1]),col=c("green","blue","black","red","darkgrey","purple"),
+          type="l",lty=1,xlab="Base Position",ylab="Base Frequency",
+          main="Base by position")
+cols <- c("green","blue","black","red","darkgrey","purple")
+leg <-  c("A","C","T","G","N","% reads")
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+clipMode(sff) <- "full"
+ac <- alphabetByCycle(sread(sff),alphabet=c("A","C","T","G","N"))
+ac.reads <- apply(ac,2,sum)
+acf <- sweep(ac,MARGIN=2,FUN="/",STATS=apply(ac,2,sum))
+
+matplot(cbind(t(acf),ac.reads/ac.reads[1]),col=c("green","blue","black","red","darkgrey","purple"),
+          type="l",lty=1,xlab="Base Position",ylab="Base Frequency",
+          main="Base by position")
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+@
+
 
 
 \section{Exploring \rSFFreader{} objects}
@@ -124,14 +161,14 @@ Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{Sff
 The \Rclass{SffReadsQ} has the following slots:
 \begin{itemize}
   \item \Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
-  \item \Robject{sread} of class \Rclass{DNAStringSet}
-  \item \Robject{qualityIR} of class \Rclass{IRanges}
-  \item \Robject{adapterIR} of class \Rclass{IRanges}
-  \item \Robject{customIR} of class \Rclass{IRanges}
+  \item \Robject{sread} of class \Rclass{DNAStringSet} which contains the nucleotide sequences.
+  \item \Robject{qualityIR} of class \Rclass{IRanges} which contains a left and right quality-based clip point for each read.
+  \item \Robject{adapterIR} of class \Rclass{IRanges} which contains a left and right adater-based clip point for each read.
+  \item \Robject{customIR} of class \Rclass{IRanges} which is initially empty, but allows the user to set custom clip points.
   \item \Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
   \item \Robject{header} of class \Rclass{list} which contains details about the SFF header.
 \end{itemize}
 
-
+The \Rclass{SffReads} has all of the above except for \Robject{quality}.
 
 \end{document}
