@@ -140,7 +140,7 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
       the corresponding fields of \code{x}.}
     \item{writeFasta}{\code{signature(object="SffReads", file, ...)}: write
       \code{object} to \code{file} in fasta format. See
-      \code{\link{writeFASTA}} for \code{...} argument values.}
+      \code{\link{writeFasta}} for \code{...} argument values.}
   }
 }
 
