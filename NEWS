@@ -127,8 +127,8 @@ SH:
   qualityClip : see availableClipModes.Rd
   qualityClip<- : see availableClipModes.Rd
   rawClip : see availableClipModes.Rd
-  id
-  writeFasta
+  id : there was a small typo, this isn't a slot, just a helper function which is included to maintain compatibility with ShortRead.
+  writeFasta : also a small typo, this is a wrapper for the writeFasta function in ShortRead (previously was listed as writeFASTA)
   availableClipModes  : added a new help file with an extensive set of examples showing how clipping works.
 ##############
 

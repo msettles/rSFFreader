@@ -133,8 +133,8 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
       object of clip points when clipMode is set to "full". }
     \item{sread}{\code{signature(object = "ANY")}: access the
       sread slot of \code{object}, returning a DNAStringSet object of reads.}
-    \item{id}{\code{signature(object = "SffReads")}: access the
-      id slot of \code{object}, returning a BStringSet object of read names.}
+    \item{id}{\code{signature(object = "SffReads")}: this function is included to maintain compatibilty with 
+      the \linkS4class{ShortRead} class, returning a BStringSet object of read names for the \code{object}.}
     \item{append}{\code{signature(x = "SffReads", values = "SffReads", length = "missing")}:
       append the \code{sread} and \code{id} slots of \code{values} after
       the corresponding fields of \code{x}.}
