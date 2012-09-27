@@ -34,18 +34,17 @@
 \alias{width,SffReads-method}
 \alias{writeFasta,SffReads-method}
 \alias{solveSffSEW}
-%\alias{adapterClip}
-%\alias{adapterClip<-}
 \alias{availableClipModes}
-%\alias{clipMode}
-%\alias{clipMode<-}
-%\alias{customClip}
-%\alias{customClip<-}
-%\alias{fullClip}
-%\alias{qualityClip}
-%\alias{qualityClip<-}
-%\alias{rawClip}
-%\alias{hist}
+\alias{adapterClip}
+\alias{adapterClip<-}
+\alias{clipMode}
+\alias{clipMode<-}
+\alias{customClip}
+\alias{customClip<-}
+\alias{fullClip}
+\alias{qualityClip}
+\alias{qualityClip<-}
+\alias{rawClip}
 
 
 
