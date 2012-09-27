@@ -101,10 +101,10 @@ went ahead and removed any reference to using "new".
   readsffheader().
 
 ########
-Added a much more in-depth description including a description of each element in the list of meta-data.
+SH: Added a much more in-depth description including a description of each element in the list of meta-data.
 Also added a much more comprehensive set of examples showing how to access header information both when using readSffHeader, 
 and when using readSff. Both are carried out with a list of sffFiles to illustrate how the object works when more than 1 file is passed to
-readSffHeader()/readSff().
+readSffHeader() or readSff().
 ########
 
 7. Many methods for SffReads objects are under-documented in the man pages:
