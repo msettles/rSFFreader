@@ -154,21 +154,21 @@ legend("topright", col=cols, legend=leg, pch=18, cex=.8)
 
 
 
-\section{Exploring \rSFFreader{} objects}
-Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{SffReadsQ} is derived from \Rclass{SffReads} and is very similar with the addition of functionality for storing quality information.
+%\section{Exploring \rSFFreader{} objects}
+%Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{SffReadsQ} is derived from \Rclass{SffReads} and is very similar with the addition of functionality for storing quality information.
 
 
-The \Rclass{SffReadsQ} has the following slots:
-\begin{itemize}
-  \item \Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
-  \item \Robject{sread} of class \Rclass{DNAStringSet} which contains the nucleotide sequences.
-  \item \Robject{qualityIR} of class \Rclass{IRanges} which contains a left and right quality-based clip point for each read.
-  \item \Robject{adapterIR} of class \Rclass{IRanges} which contains a left and right adater-based clip point for each read.
-  \item \Robject{customIR} of class \Rclass{IRanges} which is initially empty, but allows the user to set custom clip points.
-  \item \Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
-  \item \Robject{header} of class \Rclass{list} which contains details about the SFF header.
-\end{itemize}
-
-The \Rclass{SffReads} has all of the above except for \Robject{quality}.
+%The \Rclass{SffReadsQ} has the following slots:
+%\begin{itemize}
+%  \item \Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
+%  \item \Robject{sread} of class \Rclass{DNAStringSet} which contains the nucleotide sequences.
+%  \item \Robject{qualityIR} of class \Rclass{IRanges} which contains a left and right quality-based clip point for each read.
+%   \item \Robject{adapterIR} of class \Rclass{IRanges} which contains a left and right adater-based clip point for each read.
+%   \item \Robject{customIR} of class \Rclass{IRanges} which is initially empty, but allows the user to set custom clip points.
+%   \item \Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
+%   \item \Robject{header} of class \Rclass{list} which contains details about the SFF header.
+% \end{itemize}
+% 
+% The \Rclass{SffReads} has all of the above except for \Robject{quality}.
 
 \end{document}

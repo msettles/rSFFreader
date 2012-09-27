@@ -127,9 +127,12 @@ SH:
   qualityClip : see availableClipModes.Rd
   qualityClip<- : see availableClipModes.Rd
   rawClip : see availableClipModes.Rd
-  id : there was a small typo, this isn't a slot, just a helper function which is included to maintain compatibility with ShortRead.
+  rawClip<- : see availableClipModes.Rd
+  id : There was a small typo in the description. This isn't a slot, just a helper function which is included to maintain compatibility with ShortRead.
+        The description has been updated to reflect this.
   writeFasta : also a small typo, this is a wrapper for the writeFasta function in ShortRead (previously was listed as writeFASTA)
-  availableClipModes  : added a new help file with an extensive set of examples showing how clipping works.
+  availableClipModes  : added a new help file with an extensive set of examples showing how clipping works, an example of how to set/get 
+                        clip points is provided, as is a description of why maintaining clipping information is useful.
 ##############
 
 8. SffReads() is documented as if it was a generic with methods when it's
@@ -262,11 +265,10 @@ MS: Fixed all I could find, changed all to sff
 SH: Added some QA code to fill out the "simple workflow" a bit.
 ####
 
-
       - Section "Exploring rSFFreader objects" is almost empty.
 
 ####
-SH: Added some additional details to this section. But more will be added in the next release.
+SH: Agreed, I added some additional details to this section, but commented the whold section out until some additional details can be added.
 ####
 
 

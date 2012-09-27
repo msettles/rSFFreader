@@ -1,6 +1,6 @@
 
 
-availableClipModes <- function(x) c("full","adapter","quality","raw","custom")
+availableClipModes <- function() c("full","adapter","quality","raw","custom")
 
 .solveIRangeSEW <- function(widths,IR){
   if (length(IR) == 0) stop("IRanges object of length 0")
