@@ -1,0 +1,97 @@
+\name{availableClipModes}
+\alias{availableClipModes}
+  
+
+\title{availableClipModes}
+
+\description{
+  \code{availableClipModes} produces a list of clip modes supported by the rSFFreader package. These include:
+  \describe{
+    \item{adapter:}{defined in the SFF file, and meant to remove adapter sequence}
+    \item{quality:}{defined in the SFF file, and meant to remove low-quality regions of the sequence}
+    \item{full:}{uses the "interior" of quality and adapter and is the most conservative}
+    \item{raw:}{no clipping is applied and full length reads are returned}
+    \item{custom:}{clip points set by the user as an \code{IRanges} object.}
+  }
+  
+  Additional helper functions are also available for setting clip mode, and extracting and setting clip points of each type from a 
+  \value{ \code{\linkS4class{SffReads}} or \code{\linkS4class{SffReadsQ}} object.}
+  The functions include:
+  \describe{
+    \item{clipMode}{gets/sets the adapter clip mode}
+    \item{adapterClip}{get/set the adapter clip points as an \code{IRanges} object}
+    \item{customClip}{get/set the custom clip points as an \code{IRanges} object}
+    \item{fullClip}{get/set the full clip points as an \code{IRanges} object}
+    \item{qualityClip}{get/set the quality clip points as an \code{IRanges} object}
+    \item{rawClip}{get/set the raw clip points as an \code{IRanges} object}
+  }
+}
+
+\usage{
+availableClipModes()
+}
+
+
+\arguments{
+  none
+}
+
+\author{Matt Settles <msettles@uidaho.edu>}
+
+\examples{
+## Get a list of available clip modes:
+availableClipModes()
+
+## Load in an example dataset:
+sff <- loadIonSampleData()
+
+## Check the current clipMode. It should default to "full":
+clipMode(sff)
+
+## full clipping is the most conservative, resulting in shorter reads
+hist(width(sff))
+summary(width(sff))
+
+## These reads should also be free of adapters although the first base looks suspect:
+alphabetByCycle(DNAStringSet(substr(sread(sff), 1,15)), alphabet=c("A","C","T","G"))
+
+cols <- c("green","blue","black","red","darkgrey")
+leg <-  c("A","C","T","G","N")
+matplot(t(alphabetByCycle(DNAStringSet(substr(sread(sff), 1,15)), alphabet=c("A","C","T","G"))), type="l", lty=1, col=cols)
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+## Compare this to unclipped reads using "raw" mode:
+clipMode(sff) <- "raw"
+hist(width(sff),breaks=500,col="grey",xlab="Read Length",main="Raw Read Length")
+
+alphabetByCycle(DNAStringSet(substr(sread(sff), 1,15)), alphabet=c("A","C","T","G"))
+
+cols <- c("green","blue","black","red","darkgrey")
+leg <-  c("A","C","T","G","N")
+matplot(t(alphabetByCycle(DNAStringSet(substr(sread(sff), 1,15)), alphabet=c("A","C","T","G"))), type="l", lty=1, col=cols)
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+## Extract clip points for further analysis:
+full.clippoints <- fullClip(sff)
+
+raw.clippoints <- rawClip(sff)
+
+table(start(full.clippoints))
+table(start(raw.clippoints))
+
+par(mfrow=c(1,2))
+hist(end(full.clippoints))
+hist(end(raw.clippoints))
+
+par(mfrow=c(1,1))
+## determine how much was trimmed from each read by clipping
+barplot(table(end(raw.clippoints) - end(full.clippoints)))
+
+## Custom clip points can also be set using an IRanges object:
+customClip(sff) <- IRanges(start = 1, end = 4)
+clipMode(sff) <- "custom"
+t = table(counts=as.character(sread(sff)))
+t
+
+
+}

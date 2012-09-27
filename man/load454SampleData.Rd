@@ -45,7 +45,7 @@ matplot(cbind(t(acf),ac.reads/ac.reads[1]),col=c("green","blue","black","red","d
           type="l",lty=1,xlab="Base Position",ylab="Base Frequency",
           main="Base by position")
 cols <- c("green","blue","black","red","darkgrey","purple")
-leg <-  c("A","C","T","G","N","\%Percent reads")
+leg <-  c("A","C","T","G","N","\%reads")
 legend("topright", col=cols, legend=leg, pch=18, cex=.8)
 
 clipMode(sff) <- "full"

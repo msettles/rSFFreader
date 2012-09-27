@@ -34,7 +34,7 @@
 \alias{width,SffReads-method}
 \alias{writeFasta,SffReads-method}
 \alias{solveSffSEW}
-\alias{availableClipModes}
+%\alias{availableClipModes}
 \alias{adapterClip}
 \alias{adapterClip<-}
 \alias{clipMode}

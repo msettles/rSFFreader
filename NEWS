@@ -115,6 +115,22 @@ readSffHeader() or readSff().
   All those methods would need to be illustrated with at least 1 example
   (some of them are introduced in the vignette though but they need to be
   fully documented in the man pages).
+###########
+SH: 
+  adapterClip : see availableClipModes.Rd
+  adapterClip<- : see availableClipModes.Rd
+  clipMode : see availableClipModes.Rd
+  clipMode<- : see availableClipModes.Rd
+  customClip : see availableClipModes.Rd
+  customClip<- : see availableClipModes.Rd
+  fullClip : see availableClipModes.Rd
+  qualityClip : see availableClipModes.Rd
+  qualityClip<- : see availableClipModes.Rd
+  rawClip : see availableClipModes.Rd
+  id
+  writeFasta
+  availableClipModes  : added a new help file with an extensive set of examples showing how clipping works.
+
 
 8. SffReads() is documented as if it was a generic with methods when it's
   actually implemented as a regular function. Also the man page should make
