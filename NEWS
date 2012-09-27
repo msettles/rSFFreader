@@ -65,7 +65,7 @@ MS: Agreed, removed the hist function from rSFFreader
   you could define a method for SffReads objects).
 
 ###########
-MS: Defining sread as a generica would be ideal, but I assume Martin had a reason not
+MS: Defining sread as a generic would be ideal, but I assume Martin had a reason not
 to do so and I'd be happy to talk to him about that.
 However, masking the sread does not actually break the ShortRead::sread() while the
 ShortRead function is not called functionally my function will return the same result.
@@ -99,6 +99,13 @@ went ahead and removed any reference to using "new".
   inner list? Are the list named? Etc... It would help to clarify if you could
   illustrate with an example involving more that 1 file passed to
   readsffheader().
+
+########
+Added a much more in-depth description including a description of each element in the list of meta-data.
+Also added a much more comprehensive set of examples showing how to access header information both when using readSffHeader, 
+and when using readSff. Both are carried out with a list of sffFiles to illustrate how the object works when more than 1 file is passed to
+readSffHeader()/readSff().
+########
 
 7. Many methods for SffReads objects are under-documented in the man pages:
   adapterClip, adapterClip<-, clipMode, clipMode<-, customClip, customClip<-,
