@@ -141,13 +141,13 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
       the corresponding fields of \code{x}.}
     \item{writeFasta}{\code{signature(object="SffReads", file, ...)}: write
       \code{object} to \code{file} in fasta format. See
-      \code{\link{writeFASTA}} for \code{...} argument values.}
+      \code{\link{writeFasta}} for \code{...} argument values.}
   }
 }
 
 \author{Matt Settles with lots of code 'borrowed' from Martin Morgan's ShortRead Package}
 \seealso{
-  \code{\linkS4class{SffReadsQ}}
+  \code{\linkS4class{SffReadsQ} and \link{availableClipModes}}
 }
 \examples{
 showClass("SffReads")

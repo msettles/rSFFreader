@@ -15,7 +15,7 @@
   }
   
   Additional helper functions are also available for setting clip mode, and extracting and setting clip points of each type from a 
-  \value{ \code{\linkS4class{SffReads}} or \code{\linkS4class{SffReadsQ}} object.}
+  \code{\linkS4class{SffReads}} or \code{\linkS4class{SffReadsQ}} object.
   The functions include:
   \describe{
     \item{clipMode}{gets/sets the adapter clip mode}
@@ -90,8 +90,7 @@ barplot(table(end(raw.clippoints) - end(full.clippoints)))
 ## Custom clip points can also be set using an IRanges object:
 customClip(sff) <- IRanges(start = 1, end = 4)
 clipMode(sff) <- "custom"
-t = table(counts=as.character(sread(sff)))
-t
+table(counts=as.character(sread(sff)))
 
 
 }
