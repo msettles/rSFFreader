@@ -81,21 +81,33 @@ SFF files (Roche 454 and Life Sciences Ion Torrent)}
     "full". See explaination below for an expanded desription of clip modes.}
   }
 }
+\usage{
+## Constructor:
+
+SffReads(sread, qualityIR, adapterIR, customIR, clipMode="raw", header)
+}
+\arguments{
+  \item{sread}{an object of type \code{"\linkS4class{DNAStringSet}"} object representing the sequence data.}
+  
+  \item{qualityIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the quality clip points.}
+  
+  \item{adapterIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the adapter clip points.}
+
+  \item{customIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the user custom clip points.}
+  
+  ## qualityIR, adapterIR, and customIR are allowed to by empty
+
+  \item{clipMode}{a character string specifying the clipping mode to use for the object, see 
+    \code{\link{availableClipModes}} for more information.}
+    
+  \item{header}{ a list object with sff header information, see \code{\link{readSffHeader}} for more 
+    information.}
+
+}
 \section{Extends}{
 Class \code{"\linkS4class{SffHeader}"}, directly.
 }
 
-\section{Contructors}{
-  \describe{
-      \item{SffReads}{\code{sread = "DNAStringSet", id = "BStringSet"}:
-      Create a \code{SffReads} object from reads and their
-      identifiers. The length of \code{id} must match that of \code{sread}.}
-    \item{SffReads}{\code{sread = "DNAStringSet", id = "missing"}:
-      Create a \code{SffReads} object from reads, creating empty identifiers.}
-    \item{SffReads}{\code{sread = "missing", id = "missing", ...}:
-      Create an empty \code{SffReads} object.}
-  }
-}
 \section{Methods}{
   \describe{
     \item{[}{\code{signature(x = "SffReads", i = "ANY", j = "missing")}:
@@ -134,7 +146,7 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
     \item{sread}{\code{signature(object = "ANY")}: access the
       sread slot of \code{object}, returning a DNAStringSet object of reads.}
     \item{id}{\code{signature(object = "SffReads")}: this function is included to maintain compatibilty with 
-      the \linkS4class{ShortRead} class, returning a BStringSet object of read names for the \code{object}.}
+      the \code{\linkS4class{ShortRead}} class, returning a BStringSet object of read names for the \code{object}.}
     \item{append}{\code{signature(x = "SffReads", values = "SffReads", length = "missing")}:
       append the \code{sread} and \code{id} slots of \code{values} after
       the corresponding fields of \code{x}.}
@@ -146,7 +158,7 @@ Class \code{"\linkS4class{SffHeader}"}, directly.
 
 \author{Matt Settles with lots of code 'borrowed' from Martin Morgan's ShortRead Package}
 \seealso{
-  \code{\linkS4class{SffReadsQ} and \link{availableClipModes}}
+  \linkS4class{SffReadsQ} and \link{availableClipModes}
 }
 \examples{
 showClass("SffReads")

@@ -57,28 +57,33 @@ SFF files (Roche 454 and Life Sciences Ion Torrent) and their quality scores}
 Class \code{"\linkS4class{SffReads}"}, directly.
 Class \code{"\linkS4class{SffHeader}"}, by class "SffReads", distance 2.
 }
-\section{Constructors}{
-  \describe{
-      \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "QualityScore", id = "BStringSet"}:}
-    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "BStringSet", id = "BStringSet"}:
-        Create a \code{SffReadsQ} object from reads, their quality
-      scores, and identifiers. When \code{quality} is of class
-      \code{BStringSet}, the type of encoded quality score is inferred
-      from the letters used in the scores. The length of \code{id} and
-      \code{quality} must match that of \code{sread}.}
+\usage{
+## Constructor:
 
-    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "QualityScore", id = "missing"}:}
-    \item{SffReadsQ}{\code{sread = "DNAStringSet", quality = "BStringSet", id = "missing"}:
-
-      Create a \code{SffReadsQ} object from reads and their quality
-      scores, creating empty identifiers. When \code{quality} is of
-      class \code{BStringSet}, the type of encoded quality score is
-      inferred from the letters used in the scores. }
-
-    \item{SffReadsQ}{\code{sread = "missing", quality = "missing", id = "missing", ...}:
-      Create an empty \code{SffReadsQ} object.}
-  }
+SffReadsQ(sread, quality, qualityIR, adapterIR, customIR, clipMode="raw", header)
 }
+\arguments{
+  \item{sread}{an object of class \code{"\linkS4class{DNAStringSet}"} representing the sequence data.}
+  
+  \item{quality}{an object of class \code{"\linkS4class{BStringSet}"}, or \code{"\linkS4class{FastqQuality}"} representing
+    the quality values associated with the sequence in sread.}
+
+  \item{qualityIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the quality clip points.}
+  
+  \item{adapterIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the adapter clip points.}
+
+  \item{customIR}{an object of type \code{"\linkS4class{IRanges}"} object, specifying the user custom clip points.}
+
+## qualityIR, adapterIR, and customIR are allowed to by empty
+
+  \item{clipMode}{a character string specifying the clipping mode to use for the object, see 
+    \link{availableClipModes} for more information.}
+    
+  \item{header}{ a list object with sff header information, see \code{\link{readSffHeader}} for more 
+    information.}
+
+}
+
 \section{Methods}{
   \describe{
     \item{quality}{inherited from \code{signature(object = "ANY")}:

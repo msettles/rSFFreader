@@ -89,7 +89,7 @@ Currently the following modes are supported:
 \end{itemize}
 
 <<clipmode, fig=TRUE>>=
-availableClipModes()
+availableClipModes(sff)
 clipMode(sff)
 clipMode(sff) <- "raw"
 hist(width(sff), xlab="Read Lengths", 

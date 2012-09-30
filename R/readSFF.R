@@ -32,23 +32,25 @@ readSff <- function(filenames, use.qualities=TRUE, use.names=TRUE,clipMode=c("fu
 	if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
 	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose,"rSFFreader")
+	ans <- .Call("read_sff",filenames,use.names,lkup_seq, NULL,verbose)
   widths <- width(ans[["sread"]])
 	if (use.qualities){
     	SffReadsQ(sread=ans[["sread"]],quality=ans[["quality"]],
-                qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+                qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),
+                adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
                 clipMode=clipMode,header=ans[["header"]])
     } else {
     	SffReads(ans[["sread"]],
-               qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
-               clipMode=clipMode,ans[["header"]])
+               qualityIR=.fixSFFclipPoints2Iranges(widths,ans[["qualityClip"]]),
+               adapterIR=.fixSFFclipPoints2Iranges(widths,ans[["adapterClip"]]),
+               clipMode=clipMode,header=ans[["header"]])
     }
 }
 
 ## Returns a list of size 2
 readSffGeometry <- function(filenames) {
 	stopifnot(file.exists(filenames))
- 	sffgeometry <- .Call("sff_geometry", filenames,"rSFFreader")
+ 	sffgeometry <- .Call("sff_geometry", filenames)
     names(sffgeometry) <- c("nReads","Read_Widths")
 	return(sffgeometry)
 }
@@ -58,6 +60,6 @@ readSffHeader <- function(filenames,verbose=TRUE) {
     stopifnot(file.exists(filenames))
     if (!isTRUEorFALSE(verbose))
 		stop("'verbose' must be TRUE or FALSE")
-	ans <- .Call("read_sff_header", filenames,verbose,"rSFFreader")
+	ans <- .Call("read_sff_header", filenames,verbose)
 	new("SffHeader", header=ans)
 }

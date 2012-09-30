@@ -1,4 +1,4 @@
-CHANGES IN VERSION 1.00
+CHANGES IN VERSION 0.6
 -----------------------
 
 SIGNIFICANT USER-VISIBLE CHANGES
@@ -13,7 +13,7 @@ NEW FEATURES
     o All features are new
 
 BUG FIXES
-Comments by Herve, during the Bioconductor Check
+Comments by Herve, during the Bioconductor submission
 
 1. 'R CMD check' produces the following warning:
 
@@ -315,3 +315,119 @@ Thanks and let me or Martin know (or ask on the Bioc-devel mailing list) if
 you have any question or need help with this.
 
 H.
+
+
+####################################
+New comments by Herve 9/28/2012
+
+3. About your sread() function masking the sread() function in the ShortRead
+   package: ok I can see now why the former doesn't break the latter. You're
+   using an ugly hack though while there are much more elegant solutions.
+   The situation is made even more confusing by the 2 functions having
+   different signatures. It seems that's because you wanted your sread() to
+   not be just a slot getter, but also a read clipper. Why not leave the
+   sread() as it is (i.e. a slot accessor, the one defined in ShortRead would
+   work just fine on your objects), and use a different name for the function
+   that extracts and clips the reads. So I'm stepping back from my original
+   suggestion to talk with Martin about making sread() a generic. Instead I
+   would suggest that you just rename your sread() function.
+
+
+#########
+This suggestion would significantly impact the intended functionality of the package.
+Thre are many downstream analysis that are intended to function in the same manner
+with either Fastq read files in ShortRead objects or SFF read files in SffReads objects
+that would no longer have the same effect.
+
+The best thing to do, if masking as I've done is not the acceptable solution, would
+be to ask Martin if making sread a generic, which I'll do in an email and cc you.
+#########
+
+
+8. SffReads() is still documented as if it was a generic with methods but
+   it's still implemented as a regular function. New typo in
+   \section{Contructors}. There is no example of how to use SffReads().
+   And the arguments shown in the man page have not much to do with the
+   real arguments of the function. This could be avoided by putting an
+   \usage section in the man page and by showing SffReads() usage in it
+   (then 'R CMD check' would tell you about the argument mismatch).
+
+############
+MS: I see what you mean now, I've followed your example in XStringSet-class.Rd 
+and added usage and argument sections for the constructors and correctly. Sorry
+I didn't see the additional incorrect implementation.
+
+############
+
+11. It's the contrary, the C code would be simpler if you were returning
+    just an integer vector (instead of the 2-elt list). But I leave it to
+    you.
+
+
+############
+MS: The function and return value is primary used in C, I could always do something like sizeof(vector) / sizeof(int), 
+but had it available already so why not return it.
+############
+
+12. About registering .Call entry points.
+    This is how I generally test:
+
+      cd rSFFreader/src
+      grep R_init *
+
+    but that didn't produce any output for me. Now I didn't notice at first
+    that you had the R_init_rSFFreader.c file and now that I'm looking at it
+    I can see that what you have is incomplete and results in no registration
+    at all. Please refer to the "Writing R Extensions" manual for how to
+    register .Call entry points.
+
+########
+MS: I think I've found what you mean, I have to say the documentation for the C interface is extremely difficult to follow and grossly incomplete. When searchding "Writing R Extensions" no where did I see the term "register .Call entry points", I used the ShortRead 
+package as an example.
+
+added 
+
+void R_init_rSFFreader(DllInfo *info)
+{
+  R_registerRoutines(info, NULL, callMethods, NULL, NULL);
+};
+
+to R_init_rSFFreader.c
+
+#########
+
+
+
+13. The vignette is still very very light, with no real workflow. You're
+    saying that you are using the clipping scheme a lot. So it sounds like
+    this could be something really worth developping in the vignette, in
+    the context of a real workflow.
+
+#########
+MS: We will continue to work on the vignette, particularly once we get the 
+flowgram support added in.
+#########
+
+It's too late for me to ask for another round of fixes before the release
+(scheduled for next Tuesday), so let's add the package to our Subversion
+repo. However I'm really looking forward to see all the above issues
+addressed shortly after the release.
+
+Is it ok if we set the version of the package to 0.99.0 for now? That way
+it will automatically get bumped to 1.0.0 for the relase (otherwise it will
+get bumped to 1.2.0). We could even use something like 0.5.0 (so it will be
+released as 0.6.0) to emphasis the fact that the package is still under
+construction. Then you could leave it as it is in release and work on
+improving the devel version (which will be 0.7.0 after we branch on Monday).
+Since we are very short in time, I'll ask Marc Carlson to set the version
+to 0.5.0 when he adds the package to svn. You'll always be able to bump to
+0.99.0 thru your svn account if you want (preferably before 4 pm Monday,
+Seattle time).
+
+Marc will contact you off-tracker for the follow-up.
+
+###########
+MS: If the version is set to 0.5, the package still goes to the release branch, or stays in devel?
+If it goes to release, I'm cool with that, it is still under construction, but functional.
+###########
+

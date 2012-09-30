@@ -1,9 +1,19 @@
 
 
-availableClipModes <- function() c("full","adapter","quality","raw","custom")
+availableClipModes <- function(object){
+  if (class(object) %in% c("SffReads","SffReadsQ")){
+    avail <- c("raw")
+    if (length(object@customIR)) avail <- c(avail,"custom")
+    if (length(object@qualityIR)) avail <- c("adapter", avail)
+    if (length(object@adapterIR)) avail <- c("quality", avail)
+    if (length(object@qualityIR) & length(object@adapterIR)) avail <- c("full",avail)
+    avail
+    ## c("full","adapter","quality","raw","custom") 
+  } else stop("clip modes only make sense for object of types SffReads or SffReadsQ classes")
+}
 
 .solveIRangeSEW <- function(widths,IR){
-  if (length(IR) == 0) stop("IRanges object of length 0")
+  if (length(IR) == 0) return(IRanges())
   solveUserSEW(widths,start(IR),end(IR))
 }
 
@@ -13,8 +23,8 @@ availableClipModes <- function() c("full","adapter","quality","raw","custom")
   if (!is.null(starts) || !is.null(ends) || !is.null(widths)) { 
     clipmode <- "Specified"
   } else if (!missing(clipMode)) {
-    if (!(clipMode %in% availableClipModes()))
-      txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=",")))
+    if (!(clipMode %in% availableClipModes(object)))
+      txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(object),collapse=",")))
     clipmode <- clipMode
   } else clipmode <- object@clipMode
   
@@ -43,7 +53,6 @@ setMethod(writePhredQual, "FastqQuality", function(object, filepath, mode="w", .
             filepath)
   ## FIXME: different quality types
   max_width <- max( unique(width(quality(object))))
-  .Call("write_phred_quality", names(object), 
-        quality(object), file, mode, max_width)
+  .Call("write_phred_quality", names(object), quality(object), file, mode, max_width)
   invisible(length(object))
 })

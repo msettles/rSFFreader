@@ -18,9 +18,9 @@ setClass("SffReads", contains="SffHeader",
            clipMode="character"),
          prototype=prototype(
 	       sread=DNAStringSet(character(0)),
-           qualityIR=IRanges(numeric(0)),
-           adapterIR=IRanges(numeric(0)),
-           customIR=IRanges(numeric(0)),
+           qualityIR=IRanges(),
+           adapterIR=IRanges(),
+           customIR=IRanges(),
            clipMode="Full"),
          validity=.sffValidity
 )

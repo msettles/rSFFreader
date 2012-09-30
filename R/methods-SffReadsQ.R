@@ -12,26 +12,27 @@ setMethod(.sffValidity, "SffReadsQ", function(object) {
         txt <- sprintf("some sread and quality widths differ")
         msg <- c(msg, txt)
     }
+    cat("called SffReadsQ validity")
+    
     if (is.null(msg)) TRUE else msg
 })
 
 
 ## constructor
-SffReadsQ <- function(sread, quality, qualityIR, adapterIR,
-	clipMode=availableClipModes(), header, ...)
+SffReadsQ <- 
+function(sread, quality, qualityIR, adapterIR, customIR, clipMode="raw", header)
 {
     if (missing(header)) header = list()
-    clipMode = match.arg(clipMode)
-    emptyIR <- IRanges()
-    if (missing(qualityIR)) qualityIR=emptyIR
-    if (missing(adapterIR)) adapterIR=emptyIR
-    
+    if (missing(qualityIR)) qualityIR=IRanges()
+    if (missing(adapterIR)) adapterIR=IRanges()
+    if (missing(customIR)) customIR=IRanges()
+
     if (class(quality) == "BStringSet") 
         quality <- FastqQuality(quality)
     if (class(quality) != "FastqQuality") stop("quality slot must be of type FastqQuality or BStringSet")
 
     new("SffReadsQ", header=header, sread=sread, quality=quality, 
-        qualityIR=.solveIRangeSEW(width(sread),qualityIR),adapterIR= .solveIRangeSEW(width(sread), adapterIR), clipMode=clipMode, ...)    
+        qualityIR=qualityIR, adapterIR= adapterIR, customIR=customIR, clipMode=clipMode)    
 }
 
 "quality" <- function(object, start=NULL, end=NULL, width=NULL, clipmode, ...){

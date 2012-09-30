@@ -5,38 +5,28 @@ setMethod(.sffValidity,
           function(object) {
             #	cat("## SFFreads Validity ###\n")
             msg <- NULL
-            lens <- length(object@sread)
-            lenqc <- length(object@qualityIR)
-            lenac <- length(object@adapterIR)
-            if (length(unique(c(lens,lenqc,lenac))) != 1) {
-              txt <- sprintf("mismatch length in sread, qualityClip, or adapterClip: %d %d %d",lens,lenqc,lenac)
-              msg <- c(msg, txt)
-            }
-            ##TODO: need to add check for IRanges out of bounds
-            if (!(object@clipMode %in% availableClipModes())){
-              txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(),collapse=" ")))
+            object@qualityIR <- .solveIRangeSEW(width(object@sread),object@qualityIR)
+            object@adapterIR <- .solveIRangeSEW(width(object@sread), object@adapterIR)
+            object@customIR <- .solveIRangeSEW(width(object@sread),object@customIR)
+            if (!(object@clipMode %in% availableClipModes(object))){
+              txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(object),collapse=" ")))
               msg <- c(msg,txt)
             }
+            cat("called SffReads validity")
             if (is.null(msg)) TRUE else msg
 })
 
 ## constructor, missing customIR for now
 "SffReads" <- 
-  function(sread, qualityIR, adapterIR, clipMode=availableClipModes(), header, ...){
+function(sread, qualityIR, adapterIR, customIR, clipMode="raw", header)
+{
   if (missing(header)) header = list()
-  clipMode = match.arg(clipMode)
-
-  if (missing(qualityIR) | missing(adapterIR))
-    emptyIR <- IRanges(start=rep(1,length(sread)),width=width(sread))
-
-  if (missing(qualityIR)) qualityIR=emptyIR
-
-  if (missing(adapterIR)) adapterIR=emptyIR
+  if (missing(qualityIR)) qualityIR=IRanges()
+  if (missing(adapterIR)) adapterIR=IRanges()
+  if (missing(customIR)) customIR=IRanges()
   
   new("SffReads", header=header, sread=sread,
-      qualityIR=.solveIRangeSEW(width(sread), qualityIR),
-      adapterIR=.solveIRangeSEW(width(sread), adapterIR), 
-      clipMode=clipMode, ...)    
+      qualityIR=qualityIR, adapterIR= adapterIR, customIR=customIR, clipMode=clipMode)    
 }
 
 ### Accessor functions
@@ -72,7 +62,10 @@ setReplaceMethod( f="names",
 ### Print out Read Names as BString Set (ShortRead way)
 setMethod(id,
           signature="SffReads",
-          function(object) BStringSet(names(object@sread)))
+          function(object){ 
+            if (is.null(names(object@sread))) return(NULL)
+            BStringSet(names(object@sread))
+})
 
 ### number of sequences
 setMethod(length, "SffReads", function(x) length(x@sread))
@@ -128,10 +121,8 @@ setMethod(clipMode, "SffReads", function(object) object@clipMode)
 ### Reset the clip mode
 setReplaceMethod( f="clipMode",signature="SffReads", 
                   definition=function(object,value){
-                    if (!(value %in% availableClipModes()))
-                      stop("clipMode must be one of ",paste(availableClipModes(),collapse=","))
-                    if (length(do.call(paste(value,"Clip",sep=""),list(object))) == 0)
-                      stop(paste("clipMode:",value,"has not been set"))
+                    if (!(value %in% availableClipModes(object)))
+                      stop("clipMode not available, must be one of ",paste(availableClipModes(object),collapse=","))
                     object@clipMode <- value
                     return (object)
 })

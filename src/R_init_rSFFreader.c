@@ -15,5 +15,9 @@ static const R_CallMethodDef callMethods[] = {
 		{NULL, NULL, 0}
 };
 
+void R_init_rSFFreader(DllInfo *info)
+{
+  R_registerRoutines(info, NULL, callMethods, NULL, NULL);
+};
 
 
