@@ -12,7 +12,6 @@ setMethod(.sffValidity,
               txt <- sprintf(paste("wrong mode type must be one of",paste(availableClipModes(object),collapse=" ")))
               msg <- c(msg,txt)
             }
-            cat("called SffReads validity")
             if (is.null(msg)) TRUE else msg
 })
 

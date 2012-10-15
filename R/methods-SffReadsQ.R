@@ -12,7 +12,6 @@ setMethod(.sffValidity, "SffReadsQ", function(object) {
         txt <- sprintf("some sread and quality widths differ")
         msg <- c(msg, txt)
     }
-    cat("called SffReadsQ validity")
     
     if (is.null(msg)) TRUE else msg
 })
