@@ -9,7 +9,7 @@
 ## functions 
 ## returns the contents of the SFF file into either a SffReads or SffReadsQ class, which acts and behaves similar to
 ## the ShortRead and ShortReadQ classes from package ShortRead
-readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE, use.flowgrams=FALSE,clipMode=c("Full","Quality","Raw"), verbose=TRUE){
+readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE, use.flowgrams=TRUE, clipMode=c("Full","Quality","Raw"), verbose=TRUE){
 
   if (!use.names) warning ("Currently, use.names is not used.  By default, names will always be returned.")
   stopifnot(file.exists(filenames))
@@ -21,20 +21,22 @@ readsff <- function(filenames, use.qualities=TRUE, use.names=TRUE, use.flowgrams
     stop("'verbose' must be passed as TRUE or FALSE")
   }
   lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-  ans <- .Call("read_sff", filenames, use.names, TRUE, TRUE, lkup_seq, NULL, TRUE, "rSFFreader")
+  ans <- .Call("read_sff", filenames, use.names, use.flowgrams, lkup_seq, lkup_qual=NULL, verbose, "rSFFreader")
   
-  
+# read_sff(SEXP files, SEXP use_names, SEXP use_flows, SEXP lkup_seq, SEXP lkup_qual, SEXP verbose)  
+# #   
+# #   
   #WRITE NEW FUNCTION BELOW TO READ SFF FILES WITH FLOWGRAMS  
   
 #    if (!use.names) warning ("Currently use.names is not used, by default names will always be returned.")
 #    stopifnot(file.exists(filenames))
 #    clipMode <- match.arg(clipMode)
-#	if (!isTRUEorFALSE(use.names))
-#		stop("'use.names' must be TRUE or FALSE")
-#	if (!isTRUEorFALSE(verbose))
-#		stop("'verbose' must be TRUE or FALSE")
-#	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
-#	ans <- .Call("read_sff",filenames,use.names,TRUE,lkup_seq, NULL,verbose,"rSFFreader")
+# 	if (!isTRUEorFALSE(use.names))
+# 		stop("'use.names' must be TRUE or FALSE")
+# 	if (!isTRUEorFALSE(verbose))
+# 		stop("'verbose' must be TRUE or FALSE")
+# 	lkup_seq <- get_seqtype_conversion_lookup("B", "DNA")
+# 	ans <- .Call("read_sff",filenames,use.names,TRUE,lkup_seq, NULL,verbose,"rSFFreader")
 	
     #MIMIC THIS FOR FLOWGRAMS
 #    if (use.qualities){
