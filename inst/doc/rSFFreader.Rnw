@@ -1,0 +1,174 @@
+%\VignetteIndexEntry{An introduction to rSFFreader}
+%\VignetteDepends{rSFFreader}
+%\VignetteKeywords{SFF, 454, I/0, Sequencing, HighThroughputSequencing, DataImport}
+%\VignettePackage{rSFFreader}
+\documentclass[letter]{article}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[authoryear,round]{natbib}
+\usepackage{graphicx}
+\bibliographystyle{plainnat}
+
+\newcommand{\scscst}{\scriptscriptstyle}
+\newcommand{\scst}{\scriptstyle}
+
+\newcommand{\Rfunction}[1]{{\texttt{#1}}}
+\newcommand{\Robject}[1]{{\texttt{#1}}}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+\newcommand{\rSFFreader}{\Rpackage{rSFFreader}}
+\newcommand{\Rclass}[1]{{\textit{#1}}}
+
+\author{Matt Settles\footnote{msettles@uidaho.edu}}
+\marginparwidth = 0pt
+\hoffset = 0pt
+\marginparsep = 0pt
+\oddsidemargin = 0pt
+\voffset = 0pt
+\textwidth = 6.5in
+\topmargin=0pt
+\begin{document}
+
+\SweaveOpts{concordance=TRUE}
+\title{An introduction to rSFFreader}
+
+\maketitle
+
+\tableofcontents
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% set up the R environment
+<<options,echo=FALSE>>=
+options(width=60)
+@
+
+<<preliminaries>>=
+library("rSFFreader")
+library("xtable")
+@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+The SFF file format has been adopted by both Roche 454 and Ion Torrent next generation sequencing platforms. \Rpackage{rSFFreader} provides 
+functionality for loading sequence, quality scores, and flowgram information from these files. This package has been modeled after the 
+excellent \Rpackage(ShortRead) package released by Martin Morgan. It aims to maintain compatibility with that package while enabling
+direct processing of SFF files.
+
+\section{A simple workflow}
+Read in an SFF file:
+@
+%
+<<Reads454>>=
+sff <- readSff(system.file("extdata","Small454Test.sff",package="rSFFreader"))
+@
+%%
+
+\noindent Accessing the read, quality, and header information:
+<<x1>>=
+sread(sff)
+quality(sff)
+header(sff)
+@
+%%
+
+
+\noindent Plot histogram of read lengths:
+<<ReadLengths,fig=TRUE>>=
+hist(width(sff), xlab="Read Lengths", 
+     main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
+     breaks=100)
+@
+%%
+
+
+\noindent Setting the \Robject{clipMode} will change the read lengths that are reported by \Rfunction{width} and plotted by \Rfunction{hist}. 
+Currently the following modes are supported:
+\begin{itemize}
+  \item \Robject{adapter} : defined in the SFF file, and meant to remove adapter sequence
+  \item \Robject{quality} : defined in the SFF file, and meant to remove low-quality regions of the sequence
+  \item \Robject{full} : uses the "interior" of quality and adapter and is the most conservative
+  \item \Robject{raw} : no clipping is applied and full length reads are returned
+  \item \Robject{custom} : clip points set by the user as an \Rclass{IRanges} object.
+\end{itemize}
+
+<<clipmode, fig=TRUE>>=
+availableClipModes(sff)
+clipMode(sff)
+clipMode(sff) <- "raw"
+hist(width(sff), xlab="Read Lengths", 
+     main=paste("Histogram of read lengths using", clipMode(sff), "clip mode."), 
+     breaks=100)
+@
+%%
+
+Custom clip points can be set using \Rclass{IRanges}. 
+For example, it is sometimes useful to look for barcodes (MID tags) in the first 15 bases of a set of reads.
+
+<<IR>>=
+customClip(sff) <- IRanges(start = 1, end = 15)
+clipMode(sff) <- "custom"
+t = table(counts=as.character(sread(sff)))
+@
+%%
+
+
+%%
+<<texTable,results=tex,echo=FALSE>>=
+xtable(as.table(table(counts=as.character(sread(sff)))[table(as.character(sread(sff)))>2]))
+@
+%%
+
+Finally, we can generate some useful QA plots and 
+
+<<qa, fig=TRUE>>=
+## Generate some QA plots:
+## Read length histograms:
+par(mfrow=c(2,2))
+clipMode(sff) <- "raw"
+hist(width(sff),breaks=500,col="grey",xlab="Read Length",main="Raw Read Length")
+
+clipMode(sff) <- "full"
+hist(width(sff),breaks=500,col="grey",xlab="Read Length",main="Clipped Read Length")
+
+## Base by position plots:
+clipMode(sff) <- "raw"
+ac <- alphabetByCycle(sread(sff),alphabet=c("A","C","T","G","N"))
+ac.reads <- apply(ac,2,sum)
+acf <- sweep(ac,MARGIN=2,FUN="/",STATS=apply(ac,2,sum))
+
+matplot(cbind(t(acf),ac.reads/ac.reads[1]),col=c("green","blue","black","red","darkgrey","purple"),
+          type="l",lty=1,xlab="Base Position",ylab="Base Frequency",
+          main="Base by position")
+cols <- c("green","blue","black","red","darkgrey","purple")
+leg <-  c("A","C","T","G","N","% reads")
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+clipMode(sff) <- "full"
+ac <- alphabetByCycle(sread(sff),alphabet=c("A","C","T","G","N"))
+ac.reads <- apply(ac,2,sum)
+acf <- sweep(ac,MARGIN=2,FUN="/",STATS=apply(ac,2,sum))
+
+matplot(cbind(t(acf),ac.reads/ac.reads[1]),col=c("green","blue","black","red","darkgrey","purple"),
+          type="l",lty=1,xlab="Base Position",ylab="Base Frequency",
+          main="Base by position")
+legend("topright", col=cols, legend=leg, pch=18, cex=.8)
+
+@
+
+
+
+%\section{Exploring \rSFFreader{} objects}
+%Reads are stored as a \Rclass{SffReads} or \Rclass{SffReadsQ} class. \Rclass{SffReadsQ} is derived from \Rclass{SffReads} and is very similar with the addition of functionality for storing quality information.
+
+
+%The \Rclass{SffReadsQ} has the following slots:
+%\begin{itemize}
+%  \item \Robject{quality} of class \Rclass{FastqQuality} - a BStringSet instance
+%  \item \Robject{sread} of class \Rclass{DNAStringSet} which contains the nucleotide sequences.
+%  \item \Robject{qualityIR} of class \Rclass{IRanges} which contains a left and right quality-based clip point for each read.
+%   \item \Robject{adapterIR} of class \Rclass{IRanges} which contains a left and right adater-based clip point for each read.
+%   \item \Robject{customIR} of class \Rclass{IRanges} which is initially empty, but allows the user to set custom clip points.
+%   \item \Robject{clipMode} of class \Rclass{character} supported modes are: adapterClip, qualityClip and customClip.
+%   \item \Robject{header} of class \Rclass{list} which contains details about the SFF header.
+% \end{itemize}
+% 
+% The \Rclass{SffReads} has all of the above except for \Robject{quality}.
+
+\end{document}

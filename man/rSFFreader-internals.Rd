@@ -2,18 +2,8 @@
 \docType{class}
 
 % .sffValidity class
-\alias{class:.sffValidity}
-\alias{.sffValidity-class}
 \alias{.sffValidity}
-
-% .SFFBase class and methods:
-\alias{class:.SFFBase}
-\alias{.SFFBase-class}
-\alias{.SFFBase}
-
-\alias{detail,.SFFBase-method}
-\alias{show,.SFFBase-method}
-
+\alias{.solveIRangeSEW}
 
 \title{rSFFreader internals}
 

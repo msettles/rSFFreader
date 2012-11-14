@@ -1,4 +1,5 @@
-/* Author: Kyu-Chul Cho (cho@vandals.uidaho.edu)
+/* Author: Matt Settles
+   with original contributtion from:Kyu-Chul Cho (cho@vandals.uidaho.edu)
  * Last Modified: June 9, 2010
  */
 
@@ -397,11 +398,14 @@ read_sff_header(SEXP files, SEXP verbose)
 int
 count_reads_sum(SEXP files) //
 {
+    COMMONheader header;
     int i, nfile = LENGTH(files);
     int nreads = 0;
 
     for(i=0; i<nfile; i++) {
-        nreads += readCommonHeader(CHAR(STRING_ELT(files,i))).number_of_reads;
+        header = readCommonHeader(CHAR(STRING_ELT(files,i)));
+        nreads += header.number_of_reads;
+        freeCommonHeader(header);
     }
     return nreads;
 }
@@ -564,7 +568,7 @@ static void SFF_load_flowgrams(struct sff_loader *loader, const double *flows, c
       flow_result.flows[start_loc+i] = flows[i];
 
       
-        Rprintf("Location:%i value:%f\n",start_loc+i, flows[i]);
+        // Rprintf("Location:%i value:%f\n",start_loc+i, flows[i]);
     }
     
     for(i=0; i<flow_width; i++) {
@@ -659,7 +663,7 @@ readSFF(SEXP string, int *recno, SFFloader *loader)
     char ch;
     uint16_t uint16;
     uint8_t uint8;
-    uint8_t *byte_padding = (uint8_t*) malloc(sizeof(uint8_t)*(8)); // worst case
+//    static uint8_t byte_padding[8];
 
     const char *string2 = CHAR(string);
 
@@ -981,7 +985,10 @@ read_sff(SEXP files, SEXP use_names, SEXP use_flows, SEXP lkup_seq, SEXP lkup_qu
     SET_VECTOR_ELT(ans, 4, adapt_clip); /* adapter based clip points */
     SET_VECTOR_ELT(ans, 5, flowgrams); /* flowgrams */
     SET_VECTOR_ELT(ans, 6, flow_indices); /* flow indices across reads */
-    UNPROTECT(13);
+    UNPROTECT(11);
+    if (load_flowgrams) {
+      UNPROTECT(2);
+    }
 
     PROTECT(nms = NEW_CHARACTER(7));
     SET_STRING_ELT(nms, 0, mkChar("header"));
@@ -990,7 +997,7 @@ read_sff(SEXP files, SEXP use_names, SEXP use_flows, SEXP lkup_seq, SEXP lkup_qu
     SET_STRING_ELT(nms, 3, mkChar("qualityClip"));
     SET_STRING_ELT(nms, 4, mkChar("adapterClip"));
     SET_STRING_ELT(nms, 5, mkChar("flowgrams"));
-    SET_STRING_ELT(nms, 6, mkChar("flowIndicies"));
+    SET_STRING_ELT(nms, 6, mkChar("flowIndices"));
     setAttrib(ans, R_NamesSymbol, nms);
 	UNPROTECT(1);
 

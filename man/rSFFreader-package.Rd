@@ -1,8 +1,8 @@
 \name{rSFFreader-package}
 \alias{rSFFreader-package}
 \alias{rSFFreader}
-\alias{ANY-method}
 \docType{package}
+
 \title{
 
   Base classes and methods for high-throughput sequence data stored in SFF files.

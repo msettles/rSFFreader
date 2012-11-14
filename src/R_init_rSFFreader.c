@@ -8,12 +8,16 @@
 
 static const R_CallMethodDef callMethods[] = {
 /* RocheSFF-io.c */
-        CALLMETHOD_DEF(read_sff, 5),
+    CALLMETHOD_DEF(read_sff, 6),
 		CALLMETHOD_DEF(read_sff_header, 2),
 		CALLMETHOD_DEF(sff_geometry, 1),
-		CALLMETHOD_DEF(write_phred_quality, 1),
+		CALLMETHOD_DEF(write_phred_quality, 5),
 		{NULL, NULL, 0}
 };
 
+void R_init_rSFFreader(DllInfo *info)
+{
+  R_registerRoutines(info, NULL, callMethods, NULL, NULL);
+};
 
 

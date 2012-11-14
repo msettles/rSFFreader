@@ -2,25 +2,27 @@
 setGeneric("header", function(object, ...)
            standardGeneric("header"))
 
-setGeneric("adapterClip", function(object, ...)
-           standardGeneric("adapterClip"))
+#### clipModes 
+setGeneric("rawClip", function(object, ...) standardGeneric("rawClip") )
+### does not get a replace method
 
-setGeneric("qualityClip", function(object, ...)
-           standardGeneric("qualityClip"))
+setGeneric("fullClip",function(object, ...) standardGeneric("fullClip") )
+### does not get a replace method
 
-setGeneric("clipMode", function(object, ...)
-           standardGeneric("clipMode"))
+setGeneric("adapterClip", function(object, ...) standardGeneric("adapterClip") )
+setGeneric("adapterClip<-",function(object,value) standardGeneric("adapterClip<-") )
+
+setGeneric("qualityClip", function(object, ...) standardGeneric("qualityClip") )
+setGeneric("qualityClip<-",function(object,value) standardGeneric("qualityClip<-") )
+
+setGeneric("customClip", function(object, ...) standardGeneric("customClip") )
+setGeneric("customClip<-",function(object,value) standardGeneric("customClip<-") )
+
+setGeneric("clipMode", function(object, ...) standardGeneric("clipMode") )
+setGeneric("clipMode<-",function(object,value) standardGeneric("clipMode<-") )
 
 setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
-           standardGeneric("writePhredQual"))
+  standardGeneric("writePhredQual"))
 
-## breaks when a file already exists, doesn't overwrite
 setGeneric("writeFastaQual", function(object, basefilename, append=FALSE, ...)
-           standardGeneric("writeFastaQual"))
-
-setGeneric("id<-",function(x,value) {standardGeneric("id<-")} )
-setGeneric("sread<-",function(object,value) {standardGeneric("sread<-")} )
-setGeneric("quality<-",function(object,value) {standardGeneric("quality<-")} )
-setGeneric("qualityClip<-",function(object,value) {standardGeneric("qualityClip<-")} )
-setGeneric("adapterClip<-",function(object,value) {standardGeneric("adapterClip<-")} )
-setGeneric("clipMode<-",function(object,value) {standardGeneric("clipMode<-")} )
+  standardGeneric("writeFastaQual"))
