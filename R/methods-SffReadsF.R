@@ -67,4 +67,14 @@ SffReadsF <-
     new("SffReadsF", header=header, sread=sread, quality=quality, 
         qualityIR=qualityIR, adapterIR= adapterIR, customIR=customIR, clipMode=clipMode, flowgram=flowgram, flowindices=flowindices)    
   }
+## Print out flowgrams ###
+setMethod(flowgram, 
+          signature="SffReadsF", 
+          function(object) object@flowgram)
+
+### Print out flow indices ###
+setMethod(flowindices, 
+          signature="SffReadsF", 
+          function(object) object@flowindices)
+
   

@@ -26,3 +26,7 @@ setGeneric("writePhredQual", function(object, filepath, mode="w", ...)
 
 setGeneric("writeFastaQual", function(object, basefilename, append=FALSE, ...)
   standardGeneric("writeFastaQual"))
+
+setGeneric("flowgram", function(object, ...) standardGeneric("flowgram") )
+
+setGeneric("flowindices", function(object, ...) standardGeneric("flowindices") )
