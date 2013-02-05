@@ -32,3 +32,13 @@ setClass("SffReadsQ", contains="SffReads",
            quality=NumericQuality()),
          validity=.sffValidity
 )
+
+setClass("SffReadsF", contains="SffReadsQ",
+         representation=representation(
+           flowgram="matrix",
+           flowindices="list"),
+         prototype=prototype(
+           flowgram=matrix(numeric(0)),
+           flowindices=list(numeric(0))),
+         validity=.sffValidity         
+)

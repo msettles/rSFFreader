@@ -19,6 +19,7 @@ extern "C" {
 SEXP read_sff(
 		SEXP files,
 		SEXP use_names,
+    SEXP use_flowgrams,
 		SEXP lkup_seq,
 		SEXP lkup_qual,
 		SEXP verbose

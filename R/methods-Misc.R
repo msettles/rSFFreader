@@ -1,7 +1,7 @@
 
 
 availableClipModes <- function(object){
-  if (class(object) %in% c("SffReads","SffReadsQ")){
+  if (class(object) %in% c("SffReads","SffReadsQ", "SffReadsF")){
     avail <- c("raw")
     if (length(object@customIR)) avail <- c(avail,"custom")
     if (length(object@qualityIR)) avail <- c("adapter", avail)

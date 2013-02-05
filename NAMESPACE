@@ -6,18 +6,18 @@ import(IRanges)
 
 
 exportClasses(
-  SffHeader, SffReads, SffReadsQ
+  SffHeader, SffReads, SffReadsQ, SffReadsF
 )
 
 exportMethods(
   show, detail, header, names, "names<-", id, length, width, 
   adapterClip, qualityClip, customClip, rawClip, fullClip, clipMode,
   "adapterClip<-", "qualityClip<-", "customClip<-", "clipMode<-",
-  "[", append, writeFasta, writeFastq, writePhredQual, writeFastaQual
+  "[", append, writeFasta, writeFastq, writePhredQual, writeFastaQual,flowgram, flowindices
 )
 
 export(
   availableClipModes, solveSffSEW, writePhredQual, SffReads, sread, quality,
   load454SampleData, loadIonSampleData,
-  readSff, readSffGeometry, readSffHeader, SffReadsQ
+  readSff, readSffGeometry, readSffHeader, readsff
 )
