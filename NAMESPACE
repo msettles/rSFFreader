@@ -19,5 +19,5 @@ exportMethods(
 export(
   availableClipModes, solveSffSEW, writePhredQual, SffReads, sread, quality,
   load454SampleData, loadIonSampleData,
-  readSff, readSffGeometry, readSffHeader, readsff
+  readSff, readSffGeometry, readSffHeader
 )
