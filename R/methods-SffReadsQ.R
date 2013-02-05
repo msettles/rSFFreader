@@ -193,7 +193,7 @@ setMethod(writeFastq, "SffReadsQ", function(object, file, mode="w", full=FALSE, 
                        unique(width(sread(object))),
                        unique(width(quality(object)))))
     .Call(".write_fastq", id(object), sread(object),
-          quality(quality(object)), file, mode,full, max_width)
+          quality(quality(object)), file, mode,full, max_width,PACKAGE="ShortRead")
     invisible(length(object))
 })
 
