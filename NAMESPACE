@@ -1,8 +1,9 @@
 useDynLib(rSFFreader)
 
 import(methods)
-import(Biostrings)
 import(IRanges)
+#import(XVector), next version of Bioconductor
+import(Biostrings)
 
 
 exportClasses(
